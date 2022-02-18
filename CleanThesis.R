@@ -114,5 +114,34 @@ summary(lm(sumdata$sumg~sumdata$SA))
 text(sumg~SA, labels=Forest, data= sumdata, cex=0.8, font=3)
 
 #####################################################################
+### transforming expanded plot data with germ-can
+## gather function
+tidySpp<- prelim %>% 
+gather(key = "type", value="count", TSHEg:QUGAcan)
+
+## separate age and sp
+tidySpp<-tidySpp %>% extract(type, c("species", "age"), "([A-Z]+)([a-z]+)")
+# remove things with 0's
+tidySppNoZ<- tidySpp[(tidySpp$count>0),]
+#age as a factor
+tidySpp$age <- factor(tidySpp$age, levels=c("g", "s", "sm", "lg", "can"))
+par(mfrow=c(2, 5))
+plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Riverview"]~tidySppNoZ$age[tidySppNoZ$SiteName=="Riverview"],
+     xlab="Age", ylab="No", main="Riverview")
+plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Tryon"]~tidySppNoZ$age[tidySppNoZ$SiteName=="Tryon"],
+     xlab="Age", ylab="No", main="Tryon")
+plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Marquam"]~tidySppNoZ$age[tidySppNoZ$SiteName=="Marquam"])
+plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Lacamas"]~tidySppNoZ$age[tidySppNoZ$SiteName=="Lacamas"])
+plot(tidySppNoZ$count[tidySppNoZ$SiteName=="ForestPark"]~tidySppNoZ$age[tidySppNoZ$SiteName=="ForestPark"])
+plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Barlow"]~tidySppNoZ$age[tidySppNoZ$SiteName=="Barlow"])
+plot(tidySppNoZ$count[tidySppNoZ$SiteName=="McIver"]~tidySppNoZ$age[tidySppNoZ$SiteName=="McIver"])
+plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Sandy"]~tidySppNoZ$age[tidySppNoZ$SiteName=="Sandy"])
+plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Oxbow"]~tidySppNoZ$age[tidySppNoZ$SiteName=="Oxbow"])
+plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Wildwood"]~tidySppNoZ$age[tidySppNoZ$SiteName=="Wildwood"])
+
+#need a table withs mean and sd 
+avg<-with(tidySpp, tapply(count, list("SiteName"=SiteName, "Age"=age),mean))
+s<-with(tidySpp, tapply(count, list("SiteName"=SiteName, "AgeS"=age), sd))
+plot(avg)
 
 
