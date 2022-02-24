@@ -1,0 +1,65 @@
+# canopy and germ, with error bars
+install.packages("tidyverse")
+library("plotrix", "psych", "tidyverse", "ggplot2")
+prelim<-read.csv("seedling.csv") 
+prelim$SiteName <- factor(prelim$SiteName , levels=c("Barlow", 
+                                                     "McIver", "Oxbow", "Sandy", "Wildwood", 
+                                                     "ForestPark", "Lacamas", "Marquam", "Riverview", 
+                                                     "Tryon"))
+tidySpp<- prelim %>% 
+  gather(key = "type", value="count", TSHEg:QUGAcan)
+## separate age and sp
+tidySpp<-tidySpp %>% extract(type, c("species", "age"), "([A-Z]+)([a-z]+)")
+tidyCon<-tidySpp[tidySpp$species=="CON",]
+# remove things with 0's also cons
+#tidySppNoZ<- tidyCon[(tidyCon$count>0),]
+tidySppNoZ<- tidyCon
+#age as a factor
+tidySppNoZ$age <- factor(tidySppNoZ$age, levels=c("g", "s", "sm", "lg", "can"))
+
+#create the table for se and avg
+avg<-with(tidySpp, tapply(count, list("SiteName"=SiteName, "Age"=age), mean))
+colnames(avg)<-c("canavg", "germavg", "lgavg", "seedavg", "smavg")
+avg <- avg[, c("germavg", "seedavg", "smavg", "lgavg", "canavg")]
+#the area I surveyed for can and germ was different, standardize to trees / 30 m sq
+avg[,1:2]<-avg[,1:2]*6
+s<-with(tidySpp, tapply(count, list("SiteName"=SiteName, "AgeS"=age), std.error))
+colnames(s)<-c("canse", "germse", "lgse", "seedse", "smse")
+s[,c(2,4)]<-s[,c(2,4)]*6
+canGermTable<-data.frame(cbind(avg,s))
+canGermTable$Urban <- as.factor(c(0,0,0,0,0,1,1,1,1,1))
+
+#make graph
+ggplot(data = canGermTable, aes(x = canavg, y = germavg, color=Urban)) + geom_point() + #main graph
+ scale_color_manual(values=c("#B8D685", "#FFCA85")) +
+  geom_errorbar(aes(ymin = germavg-germse, ymax = germavg+germse), col="grey") + 
+  geom_errorbarh(aes(xmin = canavg-canse, xmax = canavg+canse), col="grey") +
+  geom_smooth(method=lm, se=F, fullrange=T) +
+  labs(y = "Petal length (cm)", x = "Sepal length (cm)") +
+  ggtitle("Petal and sepal length \nof three species of iris")
+
+
+
+par(mfrow=c(2, 5))
+plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Riverview"]~tidySppNoZ$age[tidySppNoZ$SiteName=="Riverview"],
+     xlab="Age", ylab="No", main="Riverview")
+plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Tryon"]~tidySppNoZ$age[tidySppNoZ$SiteName=="Tryon"],
+     xlab="Age", ylab="No", main="Tryon")
+plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Marquam"]~tidySppNoZ$age[tidySppNoZ$SiteName=="Marquam"],
+     xlab="Age", ylab="No", main="Marquam")
+plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Lacamas"]~tidySppNoZ$age[tidySppNoZ$SiteName=="Lacamas"],
+     xlab="Age", ylab="No", main="Lacamas")
+plot(tidySppNoZ$count[tidySppNoZ$SiteName=="ForestPark"]~tidySppNoZ$age[tidySppNoZ$SiteName=="ForestPark"],
+     xlab="Age", ylab="No", main="ForestPark")
+plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Barlow"]~tidySppNoZ$age[tidySppNoZ$SiteName=="Barlow"],
+     xlab="Age", ylab="No", main="Barlow")
+plot(tidySppNoZ$count[tidySppNoZ$SiteName=="McIver"]~tidySppNoZ$age[tidySppNoZ$SiteName=="McIver"],
+     xlab="Age", ylab="No", main="McIver")
+plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Sandy"]~tidySppNoZ$age[tidySppNoZ$SiteName=="Sandy"],
+     xlab="Age", ylab="No", main="Sandy")
+plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Oxbow"]~tidySppNoZ$age[tidySppNoZ$SiteName=="Oxbow"],
+     xlab="Age", ylab="No", main="Oxbow")
+plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Wildwood"]~tidySppNoZ$age[tidySppNoZ$SiteName=="Wildwood"],
+     xlab="Age", ylab="No", main="Wildwood")
+
+
