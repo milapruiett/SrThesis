@@ -35,7 +35,7 @@ ggplot(data = canGermTable, aes(x = canavg, y = germavg, color=Urban)) + geom_po
   geom_errorbar(aes(ymin = germavg-germse, ymax = germavg+germse), col="grey") + 
   geom_errorbarh(aes(xmin = canavg-canse, xmax = canavg+canse), col="grey") +
   geom_smooth(method=lm, se=F, fullrange=T) +
-  labs(y = "Petal length (cm)", x = "Sepal length (cm)") +
+  ylab(bquote('Y-axis '(number^2))) + #why won't title work???
   ggtitle("Petal and sepal length \nof three species of iris")
 
 
