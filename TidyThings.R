@@ -29,6 +29,13 @@ s[,c(2,4)]<-s[,c(2,4)]*6
 canGermTable<-data.frame(cbind(avg,s))
 canGermTable$Urban <- as.factor(c(0,0,0,0,0,1,1,1,1,1))
 
+avgTable <- tidySpp %>% 
+  group_by(species, SiteName, age) %>% 
+  summarize(a=mean(count), se=std.error(count))
+
+
+
+
 #make graph
 ggplot(data = canGermTable, aes(x = canavg, y = germavg, color=Urban)) + geom_point() + #main graph
  scale_color_manual(values=c("#B8D685", "#FFCA85")) +
