@@ -17,21 +17,35 @@ wood45$Forest <- factor(wood45$Forest , levels=c(
   "Tryon", "Barlow", "McIver", "Oxbow", "Sandy", "Wildwood"))
 
 ggplot(data = wood45, aes(x = Forest, y = SA, fill = Urban)) +
-  geom_boxplot() 
+  geom_boxplot() +
+  scale_y_continuous(trans='log10')+
+  scale_fill_brewer(palette="Pastel2") +
+  theme_light() +
+  theme(legend.title = element_blank()) +
+  ylab(bquote('Nurse Log Surface Area in 150 m'^2)) + 
+  xlab(" ") +
+  ggtitle("Rural forests seem have more nurse logs than urban forests")
 
+#two-way ANOVA with wood data
+hist(wood45$SA)
+hist(log10(1+wood45$SA))
+summary(aov(log10(1+SA) ~ Urban / Forest, data = wood45))
 
-boxplot(.001*woodcombo2$SA~woodcombo2$Urban,
-        main="Rural forests generally have more decayed wood",
-        xlab="Wilcoxon test, p=0.14",
-        col=c("#B8D685", "#FFCA85"),
-        ylab="Total decayed wood in sq m per forest"
-) 
-# want to log transform the sa?
-woodcombo2$lSA<-log10(1+(1/1500)*woodcombo2$SA)
-t.test(log10(1+(1/1500)*woodcombo2$SA)~woodcombo2$Urban)
-#what about just graphing it with a log transformed axis?
-boxplot(I(1+(1/1500)*woodcombo2$SA)~woodcombo2$Urban, log="y",
-        col=c("#B8D685", "#FFCA85"),
-        ylab="Sq cm nurse log per sq m sampled", 
-        main="Rural forests generally have more decayed wood",
-        xlab="T-test, p=0.11") 
+# collapse data
+avgWood <- wood45 %>% 
+  group_by(Forest, Urban) %>% 
+  summarize(a=sum(SA), se=std.error(SA))
+
+ggplot(data = avgWood, aes(x = Urban, y = (1+(1/1500)*a), fill=Urban)) +
+  geom_boxplot() +
+  scale_y_continuous(trans='log10') +
+  scale_fill_brewer(palette="Pastel2") +
+  theme_light() +
+  theme(legend.title = element_blank()) +
+  ylab("Sq cm nurse log per sq m sampled") + 
+  xlab(" ") +
+  ggtitle("Rural forests do not have more nurse logs than urban forests")
+
+#t.test 
+hist(log10(1+(1/1500)*avgWood$a))
+t.test(log10(1+(1/1500)*avgWood$a)~avgWood$Urban)

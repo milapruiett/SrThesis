@@ -61,7 +61,8 @@ wood45$Forest <- factor(wood45$Forest , levels=c(
 # to get the sum of wood in each forest to compare urban and rural more broadly
 woodcombo2<-aggregate(SA~ Forest, data=wood45, mean) #aggregate makes a dataframe
 #because Riverveiw and FP have no wood decay class 4 or higher, need to add new rows with 0s
-woodcombo2<-rbind(c("Riverview", 0), woodcombo2)
+woodcombo2<-rbind(c("Riverview", 0), woodcombo2) #wow I realized that in the original wood csv, forest park is called FP, which is why it said there was 0. in reality there were logs, which changes my outcome
+
 woodcombo2<-rbind(c("ForestPark", 0), woodcombo2)
 # SA needs to be numeric
 woodcombo2$SA <-as.numeric(woodcombo2$SA)
