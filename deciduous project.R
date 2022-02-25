@@ -35,3 +35,8 @@ ggplot(data = tidySpp, aes(x = age, y = count, fill=Urban)) + geom_boxplot() + f
 ggplot(data = tidySpp, aes(x = age, y = count, fill=morph)) + geom_boxplot() + facet_wrap(~ Urban, scale="free") + scale_y_continuous(trans='log10')
 
 ggplot(data = tidySpp, aes(x = Urban, y = count, fill=morph)) + geom_boxplot() + facet_wrap(~ age, scale="free") + scale_y_continuous(trans='log10')
+
+tidyG <-subset(tidySpp, age == "can")
+summary(aov(count ~ Urban + morph, data= tidyG))
+
+

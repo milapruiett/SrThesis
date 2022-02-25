@@ -1,4 +1,4 @@
-Date,Urban,Forest,Transect ID,Length (cm),Half circumference (cm),Half circumference (cm),Half circumference (cm),AvgCircumference,SA,Wire depth (cm),Wire depth (cm),Wire depth (cm),AvgDepth,Decay class,No. seedlings,Species of seedlings,
+Date,Urban,Forest,Plot,Length,HalfC1,HalfC2,HalfC3,AvgCircumference,SA,WireDepth1,WireDepth2,WireDepth3,AvgDepth,DecayClass,SeedlingNo,SeedlingSp,
 10/26/2021,0,McIver,41,390,35,35,33,34.33333333,13390,0,0,0,0,1,0,0,
 10/26/2021,0,McIver,41,380,80,90,95,88.33333333,33566.66667,7,6,13,8.666666667,3,0,0,
 10/26/2021,0,McIver,41,320,35,40,55,43.33333333,13866.66667,15,14,10,13,3,0,0,
