@@ -58,6 +58,8 @@ seedSummary <- seedData %>%
   group_by(morph, SiteName, Urban) %>% 
   summarize(a=sum(Number, na.rm=TRUE))
 
+write_csv(seedSummary, "seedSummary.csv")
+
 ggplot(data = seedSummary, aes(x = Urban, y = a, fill=morph)) +
   geom_boxplot() +
   scale_y_continuous(trans='log10') +

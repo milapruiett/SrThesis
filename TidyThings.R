@@ -19,6 +19,33 @@ tidySppNoZ<- tidyCon
 #age as a factor
 tidySppNoZ$age <- factor(tidySppNoZ$age, levels=c("g", "s", "sm", "lg", "can"))
 
+young <- c("g", "s")
+old <- c("sm", "lg", "can")
+tidySpp <- tidySpp %>% 
+  mutate(count=case_when(age %in% young ~ count*6, age %in% old ~ count*1))
+
+conifers <- c("TSHE", "THPL", "ABsp", "PSME")
+decid <- c("ALRU", "ACCI", "ALVI", "ACMA")
+urban <- c("Lacamas", "ForestPark", "Riverview", "Marquam", "Tryon")
+rural <- c("McIver", "Oxbow", "Wildwood", "Sandy", "Barlow")
+
+tidySpp <- tidySpp %>% 
+  mutate(Urban=case_when(SiteName %in% urban ~ 'urban', SiteName %in% rural ~ 'rural', TRUE ~ NA_character_))
+
+tidySpp <- tidySpp %>% 
+  mutate(morph=case_when(species %in% conifers ~ 'con', species %in% decid ~ 'dec', TRUE ~ NA_character_))
+
+tidySpp <- na.omit(tidySpp) 
+
+tidySummary <- tidySpp %>% 
+  group_by(age, Urban, SiteName) %>% 
+  summarize(avg=mean(count), se=std.error(count))
+
+
+
+
+
+
 #create the table for se and avg
 avg<-with(tidySpp, tapply(count, list("SiteName"=SiteName, "Age"=age), mean))
 colnames(avg)<-c("canavg", "germavg", "lgavg", "seedavg", "smavg")
@@ -31,6 +58,7 @@ s[,c(2,4)]<-s[,c(2,4)]*6
 canGermTable<-data.frame(cbind(avg,s))
 canGermTable$Urban <- as.factor(c("rural", "rural", "rural", "rural", "rural", "urban", "urban", "urban", "urban", "urban"))
 
+write_csv(canGermTable, "canGermTable.csv")
 
 #make graph
 ggplot(data = canGermTable, aes(x = canavg, y = germavg, color=Urban)) + 
