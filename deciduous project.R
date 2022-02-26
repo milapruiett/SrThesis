@@ -1,5 +1,5 @@
 # are there fewer decidious trees?
-prelim<-read.csv("seedling.csv") 
+prelim<-read_csv("seedling.csv") 
 prelim$SiteName <- factor(prelim$SiteName , levels=c("Barlow", 
                                                      "McIver", "Oxbow", "Sandy", "Wildwood", 
                                                      "ForestPark", "Lacamas", "Marquam", "Riverview", 
@@ -30,13 +30,25 @@ tidySpp <- tidySpp %>%
 
 tidySpp <- na.omit(tidySpp) 
 
-ggplot(data = tidySpp, aes(x = age, y = count, fill=Urban)) + geom_boxplot() + facet_wrap(~ morph, scale="free") + scale_y_continuous(trans='pseudo_log')
+ggplot(data = tidySpp, aes(x = age, y = count, fill=Urban)) + 
+  geom_boxplot() + facet_wrap(~ morph, scale="free") + 
+  scale_y_continuous(trans='pseudo_log') +
+  scale_fill_brewer(palette="Pastel2") +
+  theme_light()
 
-ggplot(data = tidySpp, aes(x = age, y = count, fill=morph)) + geom_boxplot() + facet_wrap(~ Urban, scale="free") + scale_y_continuous(trans='log10')
+ggplot(data = tidySpp, aes(x = age, y = count, fill=morph)) + 
+  geom_boxplot() + facet_wrap(~ Urban, scale="free") + 
+  scale_y_continuous(trans='log10') +
+  scale_fill_brewer(palette="Pastel1") +
+  theme_light()
 
-ggplot(data = tidySpp, aes(x = Urban, y = count, fill=morph)) + geom_boxplot() + facet_wrap(~ age, scale="free") + scale_y_continuous(trans='log10')
+ggplot(data = tidySpp, aes(x = Urban, y = count, fill=morph)) + 
+  geom_boxplot() + facet_wrap(~ age, scale="free") + 
+  scale_y_continuous(trans='log10') +
+  scale_fill_brewer(palette="Pastel1") +
+  theme_light()
 
-tidyG <-subset(tidySpp, age == "can")
+tidyG <-subset(tidySpp, age == "g")
 summary(aov(count ~ Urban + morph, data= tidyG))
 
 

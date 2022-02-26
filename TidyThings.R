@@ -8,9 +8,11 @@ prelim$SiteName <- factor(prelim$SiteName , levels=c("Barlow",
                                                      "Tryon"))
 tidySpp<- prelim %>% 
   gather(key = "type", value="count", TSHEg:QUGAcan)
+
 ## separate age and sp
 tidySpp<-tidySpp %>% extract(type, c("species", "age"), "([A-Z]+)([a-z]+)")
 tidyCon<-tidySpp[tidySpp$species=="CON",]
+
 # remove things with 0's also cons
 #tidySppNoZ<- tidyCon[(tidyCon$count>0),]
 tidySppNoZ<- tidyCon
@@ -27,23 +29,36 @@ s<-with(tidySpp, tapply(count, list("SiteName"=SiteName, "AgeS"=age), std.error)
 colnames(s)<-c("canse", "germse", "lgse", "seedse", "smse")
 s[,c(2,4)]<-s[,c(2,4)]*6
 canGermTable<-data.frame(cbind(avg,s))
-canGermTable$Urban <- as.factor(c(0,0,0,0,0,1,1,1,1,1))
-
-avgTable <- tidySpp %>% 
-  group_by(species, SiteName, age) %>% 
-  summarize(a=mean(count), se=std.error(count))
-
-
+canGermTable$Urban <- as.factor(c("rural", "rural", "rural", "rural", "rural", "urban", "urban", "urban", "urban", "urban"))
 
 
 #make graph
-ggplot(data = canGermTable, aes(x = canavg, y = germavg, color=Urban)) + geom_point() + #main graph
- scale_color_manual(values=c("#B8D685", "#FFCA85")) +
+ggplot(data = canGermTable, aes(x = canavg, y = germavg, color=Urban)) + 
+  geom_point() + 
   geom_errorbar(aes(ymin = germavg-germse, ymax = germavg+germse), col="grey") + 
-  geom_errorbarh(aes(xmin = canavg-canse, xmax = canavg+canse), col="grey") +
-  geom_smooth(method=lm, se=F, fullrange=T) +
-  ylab(bquote('Y-axis '(number^2))) + #why won't title work???
-  ggtitle("Petal and sepal length \nof three species of iris")
+  geom_errorbar(aes(xmin = canavg-canse, xmax = canavg+canse), col="grey") +
+  ylab(bquote('Conifer germinants in 30 '(m^2))) +
+  xlab(bquote('Conifer canopy Trees in 30' (m^2))) +
+  scale_color_brewer(palette="Pastel2") +
+  theme_light() +
+  ggtitle("More canopy trees = more germinants")
+
+
+#cross error bar plot
+ggplot(data = canGermTable, aes(x = canavg, y = germavg, color=Urban)) + geom_point() + 
+  geom_smooth(aes(colour=NA),method=lm, se=F, fullrange=T) +
+  ylab(bquote('Conifer germinants in 30 '(m^2))) +
+  xlab(bquote('Conifer canopy Trees in 30' (m^2))) +
+  scale_fill_brewer(palette="Pastel2") +
+  theme_light() +
+  ggtitle("More canopy trees = more germinants")
+
+
+#test the line of best fit
+summary(lm(canGermTable$germavg ~ canGermTable$canavg))
+
+
+
 
 
 
@@ -70,3 +85,4 @@ plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Wildwood"]~tidySppNoZ$age[tidySppNoZ
      xlab="Age", ylab="No", main="Wildwood")
 
 
+par(mfrow=c(1, 1))
