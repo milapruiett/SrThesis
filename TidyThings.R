@@ -37,12 +37,35 @@ tidySpp <- tidySpp %>%
 
 tidySpp <- na.omit(tidySpp) 
 
-tidySummary <- tidySpp %>% 
+ tidyConSummary <- tidySpp%>% 
+  filter(morph == "con", na.rm = TRUE) %>% 
   group_by(age, Urban, SiteName) %>% 
   summarize(avg=mean(count), se=std.error(count))
+ 
+ tidySpp <- tidySpp%>% 
+   filter(morph == "con", na.rm = TRUE)
+ 
+# look at germs in a different way
+ tidyConSummary <- tidySpp%>% 
+   filter(morph == "con", age == "g", na.rm = TRUE) %>% 
+   group_by(age, Urban, SiteName) %>% 
+   summarize(sum=sum(count))
 
-
-
+ ggplot(data = tidyConSummary, aes(x = sum, fill = Urban)) + 
+   geom_histogram() + 
+   ylab(bquote('Sum of Conifer germinants in .5 '(m^2))) +
+   scale_fill_brewer(palette="Pastel2") +
+   theme_light() +
+   ggtitle("The data is not normally distributed")
+ 
+ ggplot(data = tidyConSummary, aes(y= sum, fill = Urban)) + 
+   geom_boxplot() + 
+   ylab(bquote('Sum of Conifer germinants in .5 '(m^2))) +
+   scale_fill_brewer(palette="Pastel2") +
+   theme_light() +
+   ggtitle("Rural forests seem to have more germinants")
+ 
+wilcox.test(tidyConSummary$sum ~ tidyConSummary$)
 
 
 
@@ -84,6 +107,8 @@ ggplot(data = canGermTable, aes(x = canavg, y = germavg, color=Urban)) + geom_po
 
 #test the line of best fit
 summary(lm(canGermTable$germavg ~ canGermTable$canavg))
+
+
 
 
 

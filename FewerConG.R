@@ -14,13 +14,13 @@ survey$Urban <- as.factor(survey$Urban)
 
 ggplot(data = prelim, aes(x = SiteName, y = CONg, fill = as.factor(Urban))) +
   geom_boxplot() +
-  scale_fill_brewer(palette="Pastel2") +
+  scale_fill_brewer(palette="Pastel2", name = "Urban", labels = c("Rural", "Urban")) +
   theme_light() +
   theme(legend.title = element_blank()) +
-  ylab(bquote('Conifer Germinants in 0.5 m' ^2)) + 
+  ylab(bquote('Conifer Germinants in sampled 0.5 m' ^2)) + 
   xlab(" ") +
   ggtitle("Rural forests have more conifer germinants than urban forests")
-  
+
 # how to analyze the seedling data, nested anova
 summary(aov(CONg ~ Urban / SiteName, data = survey))
 

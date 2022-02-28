@@ -27,8 +27,21 @@ ggplot(data = wood45, aes(x = Forest, y = SA, fill = Urban)) +
   ggtitle("Rural forests seem have more nurse logs than urban forests")
 
 #two-way ANOVA with wood data
-hist(wood45$SA)
-hist(log10(1+wood45$SA))
+ggplot(data = wood45, aes(x= SA, fill = Urban)) +
+  geom_histogram()+ 
+  scale_fill_brewer(palette="Pastel2") +
+  theme_light() +
+  theme(legend.title = element_blank()) +
+  ggtitle("Data is not normally distributed")
+
+ggplot(data = wood45, aes(x= log10(1+SA), fill = Urban)) +
+  geom_histogram()+ 
+  scale_fill_brewer(palette="Pastel2") +
+  theme_light() +
+  theme(legend.title = element_blank()) +
+  ggtitle("Data is more normal when log-transformed")
+
+
 summary(aov(log10(1+SA) ~ Urban / Forest, data = wood45))
 
 # collapse data
@@ -42,10 +55,19 @@ ggplot(data = avgWood, aes(x = Urban, y = (1+(1/1500)*a), fill=Urban)) +
   scale_fill_brewer(palette="Pastel2") +
   theme_light() +
   theme(legend.title = element_blank()) +
-  ylab("Sq cm nurse log per sq m sampled") + 
+  ylab("Sum of Sq cm nurse log per sq m sampled") + 
   xlab(" ") +
   ggtitle("Rural forests do not have more nurse logs than urban forests")
 
 #t.test 
 hist(log10(1+(1/1500)*avgWood$a))
+
+ggplot(data = avgWood, aes(x= a, fill = Urban)) +
+  geom_histogram()+ 
+  scale_fill_brewer(palette="Pastel2") +
+  theme_light() +
+  theme(legend.title = element_blank()) +
+  ggtitle("Data is maybe normal? Maybe Not?")
+
 t.test(log10(1+(1/1500)*avgWood$a)~avgWood$Urban)
+wilcox.test(avgWood$a~avgWood$Urban)

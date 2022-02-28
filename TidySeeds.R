@@ -36,7 +36,7 @@ ggplot(data = seedData, aes(x = Urban, y = Number, fill=morph)) +
   scale_fill_brewer(palette="Pastel1") +
   theme_light() +
   theme(legend.title = element_blank()) +
-  ylab("Seeds per sq m sampled") + 
+  ylab("Seeds per basket") + 
   xlab(" ") +
   ggtitle("Seed Rain in Urban and Rural Forests")
 
@@ -46,7 +46,7 @@ ggplot(data = seedData, aes(x = morph, y = Number, fill=Urban)) +
   scale_fill_brewer(palette="Pastel2") +
   theme_light() +
   theme(legend.title = element_blank()) +
-  ylab("Seeds per sq m sampled") + 
+  ylab("Seeds per basket") + 
   xlab(" ") +
   ggtitle("Seed Rain in Urban and Rural Forests")
 

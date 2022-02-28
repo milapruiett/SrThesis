@@ -1,5 +1,6 @@
 #looking at wood and germs together
 library("tidyverse")
+library(shades)
 
 survey<-read_csv("seedling.csv") 
 survey$SiteName <- factor(survey$SiteName , levels=c("Barlow", 
@@ -49,8 +50,8 @@ SurveyWood <- inner_join(avgSurvey, avgWood, by="SiteName")
 ggplot(data = SurveyWood, aes(x = avgW, y = avgG)) +
   stat_smooth(method = lm) +
   geom_point(aes(color = Urban.x)) +
-  ylab("No Germinants") +
-  xlab("SA of Nurse Log") +
+  ylab("No Germinants per Plot") +
+  xlab("SA of Nurse Log per Plot") +
   ggtitle("Nurse Logs and Germinants")
 
 #graph with cross error bars, no line of best fit
@@ -61,8 +62,8 @@ ggplot(data = SurveyWood, aes(x = avgW, y = avgG, color = Urban.x, label =SiteNa
   geom_errorbar(aes(xmin = avgW-seW, xmax = avgW+seW), col="grey") +
   scale_color_brewer(palette="Pastel2") +
   theme_light() +
-  ylab("No Germinants") +
-  xlab("SA of Nurse Log") +
+  ylab("No Germinants per Plot") +
+  xlab("SA of Nurse Log per Plot") +
   ggtitle("Nurse Logs and Germinants")
 
 #test the line of best fit
