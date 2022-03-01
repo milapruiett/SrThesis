@@ -2,6 +2,23 @@ install.packages("vegan")
 library("vegan")
 install.packages("ggplot2")
 library("ggplot2")
+prelim<-read.csv("seedling.csv")
+
+myNMDSmodel=metaMDS(prelim[,4:12])
+
+plot(myNMDSmodel, display="SiteName") 
+
+# color over according to whether urban or rural
+points(myNMDSmodel$points[mydata[,3]==”Urban”], pch=16, col=”gray”)
+points(myNMDSmodel$points[mydata[,3]==”Rural”], pch=16, col=”darkgreen”)
+
+# can also add circles representing 95% confidence intervals
+ordiellipse(myNMDSmodel, groups=mydata[,3], kind=”se”, conf=0.95)  # can do various things here to make circles of different colors or add other info
+
+
+Can add arrows that show direction correlated with greatest change in abundance of certain species:
+  treefit=envfit(myNMDSmodel, mydata[,4:8])
+plot(treefit)
 
 
 ### germ nmds

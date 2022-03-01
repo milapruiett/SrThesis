@@ -48,7 +48,14 @@ ggplot(data = tidySpp, aes(x = Urban, y = count, fill=morph)) +
   scale_fill_brewer(palette="Pastel1") +
   theme_light()
 
-tidyG <-subset(tidySpp, age == "g")
-summary(aov(count ~ Urban + morph, data= tidyG))
+tidyAgeSummary <- tidySpp %>% 
+  group_by(morph, SiteName, Urban, age) %>% 
+  summarize(sum=sum(count, na.rm=TRUE))
 
+ggplot(data = tidyAgeSummary, aes(x = Urban, y = sum, fill=morph)) + 
+  geom_boxplot() + facet_wrap(~ age, scale="free") + 
+  scale_fill_brewer(palette="Pastel1") +
+  theme_light()
+
+summary(aov(sum ~ Urban + age + morph, data = tidyAgeSummary))
 

@@ -16,6 +16,55 @@ wood45$Forest <- factor(wood45$Forest , levels=c(
   "FP", "Lacamas", "Marquam", "RVNA", 
   "Tryon", "Barlow", "McIver", "Oxbow", "Sandy", "Wildwood"))
 
+sumWood <- wood45 %>% 
+  group_by(Urban, Forest, Plot) %>% 
+  summarize(a=sum(SA))
+
+forestName <- unique(sumWood$Forest)
+completeWood <- data.frame(Urban=character(),
+                           Forest=character(), 
+                           Plot=numeric(), 
+                           a= numeric(),
+                           stringsAsFactors=FALSE)
+
+completeWood <- tibble(completeWood)
+
+for (forest in forestName) {
+ sumByForest <- sumWood %>% filter(Forest == forest)
+ dummiesNeeded <- (10-nrow(sumByForest))
+ highestNum <- max(as.numeric(sumByForest$Plot))
+ completeWood <- bind_rows(completeWood, sumByForest)
+ U <- unique(sumByForest$Urban)[1]
+ f <- unique(sumByForest$Forest)[1]
+ numDum <- highestNum + dummiesNeeded 
+ value <- highestNum +1
+ print(value: numDum)
+ for (ID in value: numDum) {
+   completeWood <- add_row(completeWood, Urban = U, Forest = f, Plot = ID, a=0)
+ 
+  }
+
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ggplot(data = wood45, aes(x = Forest, y = SA, fill = Urban)) +
   geom_boxplot() +
   scale_y_continuous(trans='log10')+
