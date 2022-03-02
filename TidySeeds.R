@@ -1,68 +1,110 @@
 # seed data 
 library("plotrix", "psych", "tidyverse", "ggplot2")
-seedData <- read_csv("seedData.csv", na="-")
+seedData <- read_csv("seedData.csv", na="-") #note that there is one basket at oxbbow with nothing
+
+#one of the species is labelled wrong
+seedData$Species[131] = "PSME"
+
 #remove cones
 seedData <- seedData[seedData$Type=="Seed",]
 
 conifers <- c("TSHE", "THPL", "ABsp", "PSME")
 decid <- c("ALRU", "ACCI", "ALVI", "ACMA")
-urban <- c("Lacamas", "Forest Park", "Riverview", "Marquam", "Tryon")
+urban <- c("Lacamas", "ForestPark", "Forest Park" , "Riverview", "Marquam", "Tryon")
 rural <- c("McIver", "Oxbow", "Wildwood", "Sandy", "Barlow")
 
 seedData <- seedData %>% 
   mutate(Urban=case_when(SiteName %in% urban ~ 'urban', SiteName %in% rural ~ 'rural', TRUE ~ NA_character_))
 
+#create a datafile that has the plot IDs
+ID <- c("B09" , "B010" , "B42"  , "B011" , "B14" , "B013",  "F45" ,
+        "F49" ,  "F43"  , "F47" ,  "F48" , "F44"  , "L22"  , "L41"  ,
+        "L12"  , "L33" ,  "L7"  ,  "L5"  ,  "MA35" , "MA30" , "MA031" ,
+        "MA029", "MA33" , "MA32",  "MC023","MC078", "MC027", "MC026" ,
+        "MC22" , "MC024" , "O038", "O042" , "O041" , "O037" , "O040" ,
+        "O038" , "R7" ,  "R11" , "R5"  ,  "R10"  , "R6" ,   "R28" ,
+        "S17" ,  "S20" , "S16" ,  "S15"  , "S18",  "S19"  , "T27" ,  
+        "T15" ,  "T40" ,  "T13"  , "T37" ,  "T20" ,  "W6" ,  
+        "W8"  ,  "W2"  ,  "W3" ,   "W4" ,   "W5")
+SiteName <- c("Barlow", "Barlow", "Barlow", "Barlow", "Barlow", "Barlow",
+              "ForestPark", "ForestPark", "ForestPark", "ForestPark", "ForestPark", "ForestPark", 
+              "Lacamas", "Lacamas", "Lacamas", "Lacamas", "Lacamas", "Lacamas", 
+              "Marquam", "Marquam", "Marquam", "Marquam", "Marquam", "Marquam", 
+              "McIver", "McIver", "McIver", "McIver", "McIver", "McIver", 
+              "Oxbow", "Oxbow", "Oxbow", "Oxbow", "Oxbow", "Oxbow", 
+              "Riverview", "Riverview", "Riverview", "Riverview", "Riverview", "Riverview", 
+              "Sandy", "Sandy", "Sandy", "Sandy", "Sandy", "Sandy", 
+              "Tryon", "Tryon", "Tryon", "Tryon", "Tryon", "Tryon",
+              "Wildwood", "Wildwood", "Wildwood", "Wildwood", "Wildwood", "Wildwood")
+
+plotCodes <- tibble(ID, SiteName)
+
+
 seedData <- seedData %>% 
   mutate(morph=case_when(Species %in% conifers ~ 'con', Species %in% decid ~ 'dec', TRUE ~ NA_character_))
 
-#remove rows 8-12 and anything with an na
-seedData <- seedData[, c(1:7, 13)]
-seedData <- na.omit(seedData) 
+#only conifers
+conSeedData <- seedData[seedData$morph=="con",]
+# there are only 45 rows, which means that there are some baskets that did not have any conifer seeds
+# need to group all the species together
 
-#boxplot with the difference between urban and rural seed rain and morphology
-ggplot(data = seedData, aes(x = SiteName, y = Number, fill=morph)) +
-  geom_boxplot() +
-  scale_y_continuous(trans='pseudo_log') +
-  scale_fill_brewer(palette="Pastel1") +
-  theme_light() +
-  theme(legend.title = element_blank()) +
-  ylab("Number of Seeds") + 
-  xlab(" ") +
-  ggtitle("Seeds, type, and forest")
+conSeedSummary <- conSeedData %>% 
+  group_by(Urban, SiteName, ID) %>% 
+  summarize(a=sum(Number, na.rm=TRUE))
 
-ggplot(data = seedData, aes(x = Urban, y = Number, fill=morph)) + 
-  geom_boxplot() +
-  scale_y_continuous(trans='log10')+
-  scale_fill_brewer(palette="Pastel1") +
-  theme_light() +
-  theme(legend.title = element_blank()) +
-  ylab("Seeds per basket") + 
-  xlab(" ") +
-  ggtitle("Seed Rain in Urban and Rural Forests")
+conSeedSummary <- merge(plotCodes, conSeedSummary, by= "ID", all =T)
 
-ggplot(data = seedData, aes(x = morph, y = Number, fill=Urban)) + 
+conSeedSummary <- conSeedSummary %>% 
+  mutate(Urban=case_when(SiteName.x %in% urban ~ 'urban', SiteName.x %in% rural ~ 'rural', TRUE ~ NA_character_))
+
+conSeedSummary <- conSeedSummary[, c(1:3, 5)]
+conSeedSummary[is.na(conSeedSummary)] = 0
+
+conSeedSummary$SiteName.x <- factor(conSeedSummary$SiteName.x , levels=c(
+  "ForestPark", "Lacamas", "Marquam", "Riverview", 
+  "Tryon", "Barlow", "McIver", "Oxbow", "Sandy", "Wildwood"))
+
+# plotting this
+ggplot(data = conSeedSummary, aes(x = SiteName.x, y = a, fill = Urban)) +
   geom_boxplot() +
-  scale_y_continuous(trans='log10')+
   scale_fill_brewer(palette="Pastel2") +
   theme_light() +
   theme(legend.title = element_blank()) +
-  ylab("Seeds per basket") + 
-  xlab(" ") +
-  ggtitle("Seed Rain in Urban and Rural Forests")
+  ylab("Number of conifer seeds per basket") + 
+  xlab("anova p value .00006 ") +
+  ggtitle("Conifer seeds in urban and rural forests; each basket included (even with 0s)")
 
-# two-way anova test
-summary(aov(Number ~ Urban + morph, data= seedData))
+summary(aov(a ~ Urban / SiteName.x, data = conSeedSummary))
 
-#summarize data
-seedSummary <- seedData %>% 
-  group_by(morph, SiteName, Urban) %>% 
+
+
+
+#remove rows 8-12 and anything with an na
+decSeedData <- seedData[seedData$morph=="dec",]
+decSeedSummary <- decSeedData %>% 
+  group_by(Urban, SiteName, ID) %>% 
   summarize(a=sum(Number, na.rm=TRUE))
 
-write_csv(seedSummary, "seedSummary.csv")
+decSeedSummary <- merge(plotCodes, decSeedSummary, by= "ID", all =T)
 
-ggplot(data = seedSummary, aes(x = Urban, y = a, fill=morph)) +
+decSeedSummary <- decSeedSummary %>% 
+  mutate(Urban=case_when(SiteName.x %in% urban ~ 'urban', SiteName.x %in% rural ~ 'rural', TRUE ~ NA_character_))
+
+decSeedSummary <- decSeedSummary[, c(1:3, 5)]
+decSeedSummary[is.na(decSeedSummary)] = 0
+
+decSeedSummary$SiteName.x <- factor(decSeedSummary$SiteName.x , levels=c(
+  "ForestPark", "Lacamas", "Marquam", "Riverview", 
+  "Tryon", "Barlow", "McIver", "Oxbow", "Sandy", "Wildwood"))
+
+decSeedSummary$morph <- c("dec")
+conSeedSummary$morph <- c("con")
+completeSeedData <- rbind(conSeedSummary, decSeedSummary)
+
+
+ggplot(data = completeSeedData, aes(x = Urban, y = a, fill=morph)) +
   geom_boxplot() +
-  scale_y_continuous(trans='log10') +
+  scale_y_continuous(trans='pseudo_log') +
   scale_fill_brewer(palette="Pastel1") +
   theme_light() +
   theme(legend.title = element_blank()) +
@@ -70,19 +112,5 @@ ggplot(data = seedSummary, aes(x = Urban, y = a, fill=morph)) +
   xlab(" ") +
   ggtitle("Seeds, type, and forest")
 
-#t.test, with a hist first to show why I log transformed the data
-ggplot(data=seedData, aes(x =Number, fill = morph )) + 
-  facet_wrap(~Urban) +
-  geom_histogram( color="#e9ecef") +
-  scale_fill_brewer(palette="Pastel1") +
-  theme_light()
-
-seedData$lNo <- log10(1+seedData$Number)
-summary(aov(seedData$lNo ~ seedData$Urban + seedData$morph))
-
-t.test(log10(1+seedSummary$a)~seedSummary$Urban)
-summary(aov(seedSummary$a ~ seedSummary$Urban + seedSummary$morph))
-conSeed <- seedSummary[1:10,]
-t.test(conSeed$a ~ conSeed$Urban)
-decSeed <- seedSummary[11:20,]
-t.test(decSeed$a ~ decSeed$Urban)
+summary(aov(a ~ Urban * morph, data =completeSeedData))
+wilcox.test(a ~ Urban, data = decSeedSummary)
