@@ -49,6 +49,8 @@ completeWood$Forest <- factor(completeWood$Forest , levels=c(
   "FP", "Lacamas", "Marquam", "RVNA", 
   "Tryon", "Barlow", "McIver", "Oxbow", "Sandy", "Wildwood"))
 
+write.csv(completeWood, "completeWood.csv")
+
 ggplot(data = completeWood, aes(x = Forest, y = (1/1500)*a, fill = Urban)) +
   geom_boxplot() +
   scale_fill_brewer(palette="Pastel2") +

@@ -110,16 +110,16 @@ plot(treefit)
 
 
 ### canopy
-surveyNoZeros <- survey[rowSums(survey[41:49])>0 , 1:49]
-surveyNoZeros <-surveyNoZeros[, colSums(surveyNoZeros != 0) > 0]
+CansurveyNoZeros <- survey[rowSums(survey[41:49])>0 , c(1:3, 41:49)]
+CansurveyNoZeros <-CansurveyNoZeros[, colSums(CansurveyNoZeros != 0) > 0]
 
-myNMDSmodel=metaMDS(surveyNoZeros[ ,c(32:38)], trymax=500)
+CanmyNMDSmodel=metaMDS(CansurveyNoZeros[ ,c(4:10)], trymax=500)
 
-plot(myNMDSmodel, display="sites") 
+plot(CanmyNMDSmodel, display="sites") 
 
 # color over according to whether urban or rural
-points(myNMDSmodel$points[surveyNoZeros[,2]=="urban",], pch=16, col="brown")
-points(myNMDSmodel$points[surveyNoZeros[,2]=="rural",], pch=16, col="darkgreen")
+points(CanmyNMDSmodel$points[CansurveyNoZeros[,2]=="urban",], pch=16, col="brown")
+points(CanmyNMDSmodel$points[CansurveyNoZeros[,2]=="rural",], pch=16, col="darkgreen")
 
 # can also add circles representing 95% confidence intervals
 ordiellipse(myNMDSmodel, groups=surveyNoZeros[,2], kind="se", conf=0.95)  # can do various things here to make circles of different colors or add other info

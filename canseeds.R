@@ -1,73 +1,41 @@
 # do the no of canopy trees predict the no of seeds?
+library("plotrix", "tidyverse")
+detach(package:plyr)
+conSeedSummary <- read_csv("conSeedSummary.csv")
+tidySpp <- read_csv("tidySpp.csv")
 
-#need a table that has the avg no seeds/can and se
-seedData <- read_csv("seedData.csv", na="-")
-#remove cones
-seedData <- seedData[seedData$Type=="Seed",]
-conifers <- c("TSHE", "THPL", "ABsp", "PSME")
-decid <- c("ALRU", "ACCI", "ALVI", "ACMA")
-urban <- c("Lacamas", "Forest Park", "Riverview", "Marquam", "Tryon")
-rural <- c("McIver", "Oxbow", "Wildwood", "Sandy", "Barlow")
+#summary by site of the mean and SE
+conSeedSite <- conSeedSummary %>% 
+  group_by(Urban, SiteName) %>% 
+  summarize(meanSeed=mean(a, na.rm=TRUE), seSeed=std.error(a, na.rm=TRUE))
 
-seedData <- seedData %>% 
-  mutate(Urban=case_when(SiteName %in% urban ~ 'urban', SiteName %in% rural ~ 'rural', TRUE ~ NA_character_))
+can <- tidySpp %>% filter(morph == "con", age == "can")
 
-seedData <- seedData %>% 
-  mutate(morph=case_when(Species %in% conifers ~ 'con', Species %in% decid ~ 'dec', TRUE ~ NA_character_))
+conCanSummary <- can %>% 
+  group_by(Urban, SiteName, PlotID) %>% 
+  summarize(sum=sum(count, na.rm=TRUE))
 
-#remove rows 8-12 and anything with an na
-seedData <- seedData[, c(1:7, 13)]
-seedData <- na.omit(seedData) 
+count(conCanSummary, "SiteName")
 
-#summarize data
-conSummary <- seedData %>% 
-  filter(morph == "con", na.rm = TRUE) %>% 
-  group_by(morph, SiteName, Urban) %>% 
-  summarize(avgSeed=mean(Number, na.rm=TRUE), seSeed =std.error(Number, na.rm=TRUE))
+# add the missing plots with zeroes
+conCanSummary <- conCanSummary %>% ungroup() 
+conCanSummary <- conCanSummary %>% add_row (Urban = "urban", SiteName = "Lacamas", PlotID= 60, sum =0) %>% 
+  add_row (Urban = "urban", SiteName = "Riverview", PlotID= 200, sum =0) %>% 
+  add_row (Urban = "urban", SiteName = "Riverview", PlotID= 201, sum =0)
 
-survey<-read_csv("seedling.csv") 
-survey$SiteName <- factor(survey$SiteName , levels=c("Barlow", 
-                                                     "McIver", "Oxbow", "Sandy", "Wildwood", 
-                                                     "ForestPark", "Lacamas", "Marquam", "Riverview", 
-                                                     "Tryon"))
-urban <- c("Lacamas", "ForestPark", "Riverview", "Marquam", "Tryon")
-rural <- c("McIver", "Oxbow", "Wildwood", "Sandy", "Barlow")
+# get the mean and standard error of canopy conifers into one table 
+conCanSite <- conCanSummary %>% 
+  group_by(Urban, SiteName) %>% 
+  summarize(meanCan=mean(sum, na.rm=TRUE), seCan=std.error(sum, na.rm=TRUE))
 
-survey <- survey %>% 
-  mutate(Urban=case_when(SiteName %in% urban ~ 'urban', SiteName %in% rural ~ 'rural', TRUE ~ NA_character_))
-survey$Urban <- as.factor(survey$Urban)
+# inner join
+canSeed= conSeedSite %>% inner_join(conCanSite,by="SiteName")
 
-avgSurvey <- survey %>% 
-  group_by(SiteName, Urban) %>% 
-  summarize(avgCAN = mean(CONcan), seCAN =std.error(CONcan))
-
-#combine tables
-surveyCan <- inner_join(avgSurvey, conSummary, by="SiteName")
-
-#graph time, this one has confidence limits
-ggplot(data = surveyCan, aes(x = avgCAN, y = avgSeed)) +
-  stat_smooth(method = lm) +
-  geom_point(aes(color = Urban.x)) +
-  ylab("No Seeds per Basket") +
-  xlab("No Canopy Trees per Plot") +
-  ggtitle("Increasing canopy trees increases seed rain")
-
-#graph with cross error bars, no line of best fit
-ggplot(data = surveyCan, aes(x = avgCAN, y = avgSeed, color = Urban.x, label =SiteName)) +
-  geom_point() +
-  geom_text(hjust=0, vjust=0) +
-  geom_errorbar(aes(ymin = avgSeed-  seSeed, ymax = avgSeed + seSeed), col="grey") + 
-  geom_errorbar(aes(xmin = avgCAN - seCAN, xmax = avgCAN + seCAN), col="grey") +
-  scale_color_brewer(palette="Pastel2") +
-  theme_light() +
-  ylab("No Seeds per Basket") +
-  xlab("No Canopy Trees per Plot") +
-  ggtitle("Conifer canopy trees and conifer seeds")
-
-#test the line of best fit
-summary(lm(surveyCan$avgSeed~surveyCan$))
+# linear model
 
 
+# plot
+ggplot(data = canSeed, aes(x=meanCan, y=meanSeed)) + geom_point()
 
 
 

@@ -65,7 +65,7 @@ tidySpp <- na.omit(tidySpp)
    theme_light() +
    ggtitle("Rural forests seem to have more germinants")
  
-wilcox.test(tidyConSummary$sum ~ tidyConSummary$)
+
 
 
 

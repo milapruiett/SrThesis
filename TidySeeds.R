@@ -1,5 +1,5 @@
 # seed data 
-library("plotrix", "psych", "tidyverse", "ggplot2")
+library("tidyverse")
 seedData <- read_csv("seedData.csv", na="-") #note that there is one basket at oxbbow with nothing
 
 #one of the species is labelled wrong
@@ -58,11 +58,16 @@ conSeedSummary <- conSeedSummary %>%
   mutate(Urban=case_when(SiteName.x %in% urban ~ 'urban', SiteName.x %in% rural ~ 'rural', TRUE ~ NA_character_))
 
 conSeedSummary <- conSeedSummary[, c(1:3, 5)]
-conSeedSummary[is.na(conSeedSummary)] = 0
+conSeedSummary[is.na(conSeedSummary$a)] = 0
+conSeedSummary <- conSeedSummary[conSeedSummary$ID != 0 , ]
 
 conSeedSummary$SiteName.x <- factor(conSeedSummary$SiteName.x , levels=c(
   "ForestPark", "Lacamas", "Marquam", "Riverview", 
   "Tryon", "Barlow", "McIver", "Oxbow", "Sandy", "Wildwood"))
+
+conSeedSummary <- rename(conSeedSummary, SiteName = SiteName.x)
+
+write_csv(conSeedSummary, "conSeedSummary.csv")
 
 # plotting this
 ggplot(data = conSeedSummary, aes(x = SiteName.x, y = a, fill = Urban)) +

@@ -11,6 +11,8 @@ survey <- survey %>%
   mutate(Urban=case_when(SiteName %in% urban ~ 'urban', SiteName %in% rural ~ 'rural', TRUE ~ NA_character_))
 survey$Urban <- as.factor(survey$Urban)
 
+conG <- survey %>% select("SiteName", "Urban", "PlotID", "CONg")
+write.csv(conG, "conG.csv")
 
 ggplot(data = prelim, aes(x = SiteName, y = CONg, fill = as.factor(Urban))) +
   geom_boxplot() +
