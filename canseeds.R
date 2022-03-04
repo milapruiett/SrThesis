@@ -25,17 +25,38 @@ conCanSummary <- conCanSummary %>% add_row (Urban = "urban", SiteName = "Lacamas
 
 # get the mean and standard error of canopy conifers into one table 
 conCanSite <- conCanSummary %>% 
-  group_by(Urban, SiteName) %>% 
+  group_by(SiteName) %>% 
   summarize(meanCan=mean(sum, na.rm=TRUE), seCan=std.error(sum, na.rm=TRUE))
 
 # inner join
 canSeed= conSeedSite %>% inner_join(conCanSite,by="SiteName")
 
 # linear model
-
+summary(lm(canSeed$meanSeed ~ canSeed$meanCan))
 
 # plot
-ggplot(data = canSeed, aes(x=meanCan, y=meanSeed)) + geom_point()
+# as a line
+ggplot(data = canSeed, aes(x=meanCan, y=meanSeed, label= SiteName)) + 
+  geom_point(aes(color = Urban)) +
+  geom_smooth(method=lm) +
+  scale_color_brewer(palette="Pastel2") +
+  theme_light() +
+  theme(legend.title = element_blank()) +
+  ylab("Average conifer seeds per basket") + 
+  xlab("Average conifer canopy trees per transect") +
+  ggtitle("Conifer canopy trees and seeds")
+
+# with cross erros
+ggplot(data = canSeed, aes(x = meanCan, y = meanSeed, color = Urban, label =SiteName)) +
+  geom_point() +
+  geom_text(hjust=0, vjust=0) +
+  geom_errorbar(aes(ymin = meanSeed - seSeed, ymax = meanSeed + seSeed), col="grey") + 
+  geom_errorbar(aes(xmin = meanCan - seCan, xmax = meanCan + seCan), col="grey") +
+  scale_color_brewer(palette="Pastel2") +
+  theme_light() +
+  ylab("No Seeds per Basket") +
+  xlab("No Canopy Trees per Plot") +
+  ggtitle("Conifer canopy trees and conifer seeds")
 
 
 
