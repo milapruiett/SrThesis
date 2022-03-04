@@ -1,3 +1,0 @@
-# Source contains all of the .R files
-
-# still need to organize everything...
