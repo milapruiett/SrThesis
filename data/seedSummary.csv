@@ -1,0 +1,21 @@
+morph,SiteName,Urban,a
+con,Barlow,rural,102
+con,Forest Park,urban,10
+con,Lacamas,urban,19
+con,Marquam,urban,3
+con,McIver,rural,53
+con,Oxbow,rural,8
+con,Riverview,urban,32
+con,Sandy,rural,82
+con,Tryon,urban,5
+con,Wildwood,rural,67
+dec,Barlow,rural,70
+dec,Forest Park,urban,222
+dec,Lacamas,urban,113
+dec,Marquam,urban,318
+dec,McIver,rural,100
+dec,Oxbow,rural,15
+dec,Riverview,urban,319
+dec,Sandy,rural,49
+dec,Tryon,urban,106
+dec,Wildwood,rural,30
