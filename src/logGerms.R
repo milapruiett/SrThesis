@@ -1,7 +1,7 @@
 # do nurse logs line up with germinants?
 
 conG <- read_csv("data/conG.csv")
-completeWood <- read_csv("data/completeWood.csv")
+completeWood <- read_csv("data/completeWood45.csv")
 
 # multiply so that wood is in cm per sq m
 completeWood <- completeWood %>%
@@ -42,7 +42,7 @@ ggplot(data = woodGerm, aes(x=meanW, y=meanG)) +
   theme_light() +
   theme(legend.title = element_blank()) +
   ylab("Mean no. conifer germinants") + 
-  xlab("Mean surface area of logs decay classes 4 and 5") +
+  xlab("Mean surface area of logs decay classes 4 and 5, sq cm per sq m sampled") +
   ggtitle("Conifer germinants and logs")
 dev.off()
 
@@ -56,6 +56,6 @@ ggplot(data = woodGerm, aes(x = meanW, y = meanG)) +
   geom_text(aes(label = SiteName), colour="black", size = 3)+
   theme_light() +
   ylab("No germinants per forest") +
-  xlab("Surface area decay classes 4 and 5 logs") +
+  xlab("Surface area decay classes 4 and 5 logs, sq cm per sq m sampled") +
   ggtitle("Conifer germinants and logs")
 dev.off()
