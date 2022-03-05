@@ -1,9 +1,61 @@
 # are there fewer nurse logs
-wood<-read_csv("wood.csv")
-# row 254 is missing data
-wood$Forest[254] = "Wildwood"
+
+wood<-read_csv("data/wood.csv")
+
+# first look at all wood
+urban <- c("Lacamas", "FP", "RVNA", "Marquam", "Tryon")
+rural <- c("McIver", "Oxbow", "Wildwood", "Sandy", "Barlow")
+
+wood <- wood %>% 
+  mutate(Urban=case_when(Forest %in% urban ~ 'urban', Forest %in% rural ~ 'rural', TRUE ~ NA_character_))
+
+sumWood <- wood %>% 
+  group_by(Urban, Forest, Plot) %>% 
+  summarize(a=sum(SA))
+
+write.csv(sumWood, "data/sumWoodAllDecayClasses.csv")
+
+#ensure forest is as a factor
+sumWood$Forest <- factor(sumWood$Forest , levels=c(
+  "FP", "Lacamas", "Marquam", "RVNA", 
+  "Tryon", "Barlow", "McIver", "Oxbow", "Sandy", "Wildwood"))
+
+jpeg("output/allLogsByForest.jpeg")
+ggplot(data = sumWood, aes(x = Forest, y = (1/1500)*a, fill = Urban)) +
+  geom_boxplot() +
+  scale_fill_brewer(palette="Pastel2") +
+  theme_light() +
+  theme(legend.title = element_blank()) +
+  ylab(bquote('Logs of all decay classes, surface area in sq cm per sq m forest surveyed')) + 
+  xlab("") +
+  ggtitle("Logs of all decay classes in urban and rural forests")
+dev.off()
+
+summary(aov(log10(1 + a) ~ Urban / Forest, data = sumWood))
+
+# collapse data
+avgWood <- wood %>% 
+  group_by(Forest, Urban) %>% 
+  summarize(sumWood=sum(SA))
+
+jpeg("output/allLogsByUrban.jpg")
+ggplot(data = avgWood, aes(x = Urban, y = ((1/1500)*sumWood), fill=Urban)) +
+  geom_boxplot() +
+  scale_y_continuous(trans='log10') +
+  scale_fill_brewer(palette="Pastel2") +
+  theme_light() +
+  theme(legend.title = element_blank()) +
+  ylab("Sum of Sq cm logs of all decay classes per sq m sampled") + 
+  xlab("") +
+  ggtitle("Rural forests seem to have more logs total than urban forests")
+dev.off()
+
+#wilcox test
+wilcox.test(avgWood$sumWood ~ avgWood$Urban)
+
 
 #only want decay classes 4 and 5
+
 wood45=subset(wood, DecayClass %in% c("4", "5"))
 
 #need to add a column to signify if urban or rural
@@ -13,7 +65,7 @@ rural <- c("McIver", "Oxbow", "Wildwood", "Sandy", "Barlow")
 wood45 <- wood45 %>% 
   mutate(Urban=case_when(Forest %in% urban ~ 'urban', Forest %in% rural ~ 'rural', TRUE ~ NA_character_))
 
-sumWood <- wood45 %>% 
+sumWood45 <- wood45 %>% 
   group_by(Urban, Forest, Plot) %>% 
   summarize(a=sum(SA))
 
@@ -29,7 +81,7 @@ completeWood <- tibble(completeWood)
 #add zeros so that each forest has 10 plots, with the sum of the area of nurse log
 #in each plot
 for (forest in forestName) {
- sumByForest <- sumWood %>% filter(Forest == forest)
+ sumByForest <- sumWood45 %>% filter(Forest == forest)
  dummiesNeeded <- (10-nrow(sumByForest))
  highestNum <- max(as.numeric(sumByForest$Plot))
  completeWood <- bind_rows(completeWood, sumByForest)
@@ -49,44 +101,38 @@ completeWood$Forest <- factor(completeWood$Forest , levels=c(
   "FP", "Lacamas", "Marquam", "RVNA", 
   "Tryon", "Barlow", "McIver", "Oxbow", "Sandy", "Wildwood"))
 
-write.csv(completeWood, "completeWood.csv")
+write.csv(completeWood, "data/completeWoodDecay45.csv")
 
+jpeg("output/wood45ByForest.jpg")
 ggplot(data = completeWood, aes(x = Forest, y = (1/1500)*a, fill = Urban)) +
   geom_boxplot() +
   scale_fill_brewer(palette="Pastel2") +
   theme_light() +
   theme(legend.title = element_blank()) +
   ylab(bquote('Logs of decay classes 4 and 5, surface area in sq cm per sq m forest surveyed')) + 
-  xlab("anova p-value on log transformed data is 0.12") +
-  ggtitle("Each boxplot represents 10 transects, only decay classes 4 and 5")
+  xlab("") +
+  ggtitle("Logs of decay classes 4 and 5 in urban and rural forests")
+dev.off()
 
 
 summary(aov(log10(1 + a) ~ Urban / Forest, data = completeWood))
 
-# collapse data
-avgWood <- wood45 %>% 
+# collapse data of decy 4 and 5
+avgWood45 <- wood45 %>% 
   group_by(Forest, Urban) %>% 
   summarize(sumWood=sum(SA))
 
-ggplot(data = avgWood, aes(x = Urban, y = ((1/1500)*sumWood), fill=Urban)) +
+jpeg("output/Logs45ByUrban.jpg")
+ggplot(data = avgWood45, aes(x = Urban, y = ((1/1500)*sumWood), fill=Urban)) +
   geom_boxplot() +
   scale_y_continuous(trans='log10') +
   scale_fill_brewer(palette="Pastel2") +
   theme_light() +
   theme(legend.title = element_blank()) +
   ylab("Sum of Sq cm logs of decay classes 4 and 5 per sq m sampled") + 
-  xlab("wilcox test, p-value = 0.5 ") +
-  ggtitle("Rural forests seem to have more logs total than urban forests")
+  xlab("") +
+  ggtitle("Sum of wood of decay classes 4 and 5 in urban and rural forests")
+dev.off()
 
 #t.test 
-hist(log10(1+(1/1500)*avgWood$sumWood))
-
-ggplot(data = avgWood, aes(x= sumWood, fill = Urban)) +
-  geom_histogram()+ 
-  scale_fill_brewer(palette="Pastel2") +
-  theme_light() +
-  theme(legend.title = element_blank()) +
-  ggtitle("Data is maybe normal? Maybe Not?")
-
-t.test(avgWood$sumWood~avgWood$Urban)
-wilcox.test(avgWood$sumWood~avgWood$Urban)
+wilcox.test(avgWood45$sumWood~avgWood45$Urban)

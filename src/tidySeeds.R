@@ -1,16 +1,20 @@
 # seed data 
 library("tidyverse")
-seedData <- read_csv("seedData.csv", na="-") #note that there is one basket at oxbbow with nothing
+seedData <- read_csv("data/seedData.csv", na="-") #note that there is one basket at oxbbow with nothing
 
 #one of the species is labelled wrong
-seedData$Species[131] = "PSME"
+seedData$Species[130] = "PSME"
 
 #remove cones
 seedData <- seedData[seedData$Type=="Seed",]
 
+#remove the row that has all NAs
+seedData<- seedData %>%
+  filter(!is.na(SiteName))
+
 conifers <- c("TSHE", "THPL", "ABsp", "PSME")
-decid <- c("ALRU", "ACCI", "ALVI", "ACMA")
-urban <- c("Lacamas", "ForestPark", "Forest Park" , "Riverview", "Marquam", "Tryon")
+decid <- c("ALRU", "ACCI", "ALVI", "ACMA", "ACAM")
+urban <- c("Lacamas", "Forest Park", "Forest Park" , "Riverview", "Marquam", "Tryon")
 rural <- c("McIver", "Oxbow", "Wildwood", "Sandy", "Barlow")
 
 seedData <- seedData %>% 
@@ -27,7 +31,7 @@ ID <- c("B09" , "B010" , "B42"  , "B011" , "B14" , "B013",  "F45" ,
         "T15" ,  "T40" ,  "T13"  , "T37" ,  "T20" ,  "W6" ,  
         "W8"  ,  "W2"  ,  "W3" ,   "W4" ,   "W5")
 SiteName <- c("Barlow", "Barlow", "Barlow", "Barlow", "Barlow", "Barlow",
-              "ForestPark", "ForestPark", "ForestPark", "ForestPark", "ForestPark", "ForestPark", 
+              "Forest Park", "Forest Park", "Forest Park", "Forest Park", "Forest Park", "Forest Park", 
               "Lacamas", "Lacamas", "Lacamas", "Lacamas", "Lacamas", "Lacamas", 
               "Marquam", "Marquam", "Marquam", "Marquam", "Marquam", "Marquam", 
               "McIver", "McIver", "McIver", "McIver", "McIver", "McIver", 
@@ -42,6 +46,9 @@ plotCodes <- tibble(ID, SiteName)
 
 seedData <- seedData %>% 
   mutate(morph=case_when(Species %in% conifers ~ 'con', Species %in% decid ~ 'dec', TRUE ~ NA_character_))
+
+seedData<- seedData %>%
+  filter(!is.na(morph))
 
 #only conifers
 conSeedData <- seedData[seedData$morph=="con",]
@@ -58,31 +65,37 @@ conSeedSummary <- conSeedSummary %>%
   mutate(Urban=case_when(SiteName.x %in% urban ~ 'urban', SiteName.x %in% rural ~ 'rural', TRUE ~ NA_character_))
 
 conSeedSummary <- conSeedSummary[, c(1:3, 5)]
-conSeedSummary[is.na(conSeedSummary$a)] = 0
 conSeedSummary <- conSeedSummary[conSeedSummary$ID != 0 , ]
-
-conSeedSummary$SiteName.x <- factor(conSeedSummary$SiteName.x , levels=c(
-  "ForestPark", "Lacamas", "Marquam", "Riverview", 
-  "Tryon", "Barlow", "McIver", "Oxbow", "Sandy", "Wildwood"))
 
 conSeedSummary <- rename(conSeedSummary, SiteName = SiteName.x)
 
-write_csv(conSeedSummary, "conSeedSummary.csv")
+conSeedSummary$SiteName <- factor(conSeedSummary$SiteName , levels=c(
+  "Forest Park", "Lacamas", "Marquam", "Riverview", 
+  "Tryon", "Barlow", "McIver", "Oxbow", "Sandy", "Wildwood"))
+
+conSeedSummary$a[is.na(conSeedSummary$a)] = 0
+
+write_csv(conSeedSummary, "data/conSeedSummary.csv")
 
 # plotting this
-ggplot(data = conSeedSummary, aes(x = SiteName.x, y = a, fill = Urban)) +
+jpeg("output/conSeedsByForest.jpg")
+ggplot(data = conSeedSummary, aes(x = SiteName, y = a, fill = Urban)) +
   geom_boxplot() +
   scale_fill_brewer(palette="Pastel2") +
   theme_light() +
   theme(legend.title = element_blank()) +
   ylab("Number of conifer seeds per basket") + 
-  xlab("anova p value .00006 ") +
-  ggtitle("Conifer seeds in urban and rural forests; each basket included (even with 0s)")
+  xlab("") +
+  ggtitle("Conifer seeds in urban and rural forests")
+dev.off()
 
-summary(aov(a ~ Urban / SiteName.x, data = conSeedSummary))
+summary(aov(a ~ Urban / SiteName, data = conSeedSummary))
 
 
 
+
+
+### if I'm interested in conifer vs decidious
 
 #remove rows 8-12 and anything with an na
 decSeedData <- seedData[seedData$morph=="dec",]

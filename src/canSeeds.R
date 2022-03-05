@@ -35,28 +35,34 @@ canSeed= conSeedSite %>% inner_join(conCanSite,by="SiteName")
 summary(lm(canSeed$meanSeed ~ canSeed$meanCan))
 
 # plot
+
 # as a line
-ggplot(data = canSeed, aes(x=meanCan, y=meanSeed, label= SiteName)) + 
-  geom_point(aes(color = Urban)) +
+jpeg("output/canSeedByForestLine.jpg")
+ggplot(data = canSeed, aes(x=meanCan, y=meanSeed)) + 
   geom_smooth(method=lm) +
   scale_color_brewer(palette="Pastel2") +
+  geom_point(size = 4, aes(color = Urban)) +
+  geom_text(aes(label = SiteName), colour="black", size = 3)+
   theme_light() +
   theme(legend.title = element_blank()) +
   ylab("Average conifer seeds per basket") + 
   xlab("Average conifer canopy trees per transect") +
   ggtitle("Conifer canopy trees and seeds")
+dev.off()
 
 # with cross erros
-ggplot(data = canSeed, aes(x = meanCan, y = meanSeed, color = Urban, label =SiteName)) +
-  geom_point() +
-  geom_text(hjust=0, vjust=0) +
+jpeg("output/canSeedByForestCrossErrors.jpg")
+ggplot(data = canSeed, aes(x = meanCan, y = meanSeed, color = Urban)) +
   geom_errorbar(aes(ymin = meanSeed - seSeed, ymax = meanSeed + seSeed), col="grey") + 
   geom_errorbar(aes(xmin = meanCan - seCan, xmax = meanCan + seCan), col="grey") +
+  geom_point(size = 4) +
+  geom_text(aes(label = SiteName), colour="black", size = 3)+
   scale_color_brewer(palette="Pastel2") +
   theme_light() +
   ylab("No Seeds per Basket") +
   xlab("No Canopy Trees per Plot") +
   ggtitle("Conifer canopy trees and conifer seeds")
+dev.off()
 
 
 
