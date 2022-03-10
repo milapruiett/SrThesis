@@ -56,7 +56,7 @@ wilcox.test(avgWood$sumWood ~ avgWood$Urban)
 
 #only want decay classes 4 and 5
 
-wood45=subset(wood, DecayClass %in% c("4", "5"))
+wood45=subset(wood, DecayClass %in% c("1", "2", "3"))
 
 #need to add a column to signify if urban or rural
 urban <- c("Lacamas", "FP", "RVNA", "Marquam", "Tryon")

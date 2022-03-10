@@ -21,7 +21,7 @@ ggplot(data = prelim, aes(x = SiteName, y = CONg, fill = as.factor(Urban))) +
   scale_fill_brewer(palette="Pastel2", name = "Urban", labels = c("Rural", "Urban")) +
   theme_light() +
   theme(legend.title = element_blank()) +
-  ylab(bquote('Conifer Germinants in sampled 0.5 m' ^2)) + 
+  ylab(bquote('Conifer Germinants in sampled 5 m' ^2)) + 
   xlab(" ") +
   ggtitle("Rural forests have more conifer germinants than urban forests")
 dev.off()

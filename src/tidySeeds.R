@@ -70,8 +70,9 @@ conSeedSummary <- conSeedSummary[conSeedSummary$ID != 0 , ]
 conSeedSummary <- rename(conSeedSummary, SiteName = SiteName.x)
 
 conSeedSummary$SiteName <- factor(conSeedSummary$SiteName , levels=c(
+  "Barlow", "McIver", "Oxbow", "Sandy", "Wildwood",
   "Forest Park", "Lacamas", "Marquam", "Riverview", 
-  "Tryon", "Barlow", "McIver", "Oxbow", "Sandy", "Wildwood"))
+  "Tryon"))
 
 conSeedSummary$a[is.na(conSeedSummary$a)] = 0
 
@@ -86,7 +87,7 @@ ggplot(data = conSeedSummary, aes(x = SiteName, y = a, fill = Urban)) +
   theme(legend.title = element_blank()) +
   ylab("Number of conifer seeds per basket") + 
   xlab("") +
-  ggtitle("Conifer seeds in urban and rural forests")
+  ggtitle("Fewer conifer seeds in urban forests compared to rural")
 dev.off()
 
 summary(aov(a ~ Urban / SiteName, data = conSeedSummary))
