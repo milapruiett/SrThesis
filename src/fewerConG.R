@@ -16,7 +16,7 @@ conG <- survey %>% select("SiteName", "Urban", "PlotID", "CONg")
 write.csv(conG, "data/conG.csv")
 
 jpeg("output/coniferGerms.jpg")
-ggplot(data = prelim, aes(x = SiteName, y = CONg, fill = as.factor(Urban))) +
+ggplot(data = survey, aes(x = SiteName, y = CONg, fill = as.factor(Urban))) +
   geom_boxplot() +
   scale_fill_brewer(palette="Pastel2", name = "Urban", labels = c("Rural", "Urban")) +
   theme_light() +
@@ -28,5 +28,9 @@ dev.off()
 
 # how to analyze the seedling data, nested anova
 summary(aov(CONg ~ Urban / SiteName, data = survey))
+
+survey %>%
+  group_by(Urban) %>%
+  summarise(mean(CONg))
 
         

@@ -17,8 +17,8 @@ write.csv(sumWood, "data/sumWoodAllDecayClasses.csv")
 
 #ensure forest is as a factor
 sumWood$Forest <- factor(sumWood$Forest , levels=c(
-  "FP", "Lacamas", "Marquam", "RVNA", 
-  "Tryon", "Barlow", "McIver", "Oxbow", "Sandy", "Wildwood"))
+  "Barlow", "McIver", "Oxbow", "Sandy", "Wildwood",
+  "FP", "Lacamas", "Marquam", "RVNA",   "Tryon" ))
 
 jpeg("output/allLogsByForest.jpeg")
 ggplot(data = sumWood, aes(x = Forest, y = (1/1500)*a, fill = Urban)) +
@@ -31,7 +31,14 @@ ggplot(data = sumWood, aes(x = Forest, y = (1/1500)*a, fill = Urban)) +
   ggtitle("Logs of all decay classes in urban and rural forests")
 dev.off()
 
+# test for significance
 summary(aov(log10(1 + a) ~ Urban / Forest, data = sumWood))
+t.test(log10(1 + sumWood$a) ~ sumWood$Urban)
+
+# get the mean of each group to report out
+sumWood %>%
+  group_by(Urban) %>%
+  summarise(mean(a))
 
 # collapse data
 avgWood <- wood %>% 
@@ -98,8 +105,9 @@ for (forest in forestName) {
 
 #ensure forest is as a factor
 completeWood$Forest <- factor(completeWood$Forest , levels=c(
+  "Barlow", "McIver", "Oxbow", "Sandy", "Wildwood",
   "FP", "Lacamas", "Marquam", "RVNA", 
-  "Tryon", "Barlow", "McIver", "Oxbow", "Sandy", "Wildwood"))
+  "Tryon"))
 
 write.csv(completeWood, "data/completeWoodDecay45.csv")
 
@@ -114,8 +122,13 @@ ggplot(data = completeWood, aes(x = Forest, y = (1/1500)*a, fill = Urban)) +
   ggtitle("Logs of decay classes 4 and 5 in urban and rural forests")
 dev.off()
 
-
+# test for significance
 summary(aov(log10(1 + a) ~ Urban / Forest, data = completeWood))
+
+# see the mean by group
+completeWood %>%
+  group_by(Urban) %>%
+  summarise(mean(a))
 
 # collapse data of decy 4 and 5
 avgWood45 <- wood45 %>% 
