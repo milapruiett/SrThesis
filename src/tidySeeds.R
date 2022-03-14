@@ -14,7 +14,7 @@ seedData<- seedData %>%
 
 conifers <- c("TSHE", "THPL", "ABsp", "PSME")
 decid <- c("ALRU", "ACCI", "ALVI", "ACMA", "ACAM")
-urban <- c("Lacamas", "Forest Park", "Forest Park" , "Riverview", "Marquam", "Tryon")
+urban <- c("Lacamas", "Forest Park", "ForestPark" , "Forest Park", "Riverview", "Marquam", "Tryon")
 rural <- c("McIver", "Oxbow", "Wildwood", "Sandy", "Barlow")
 
 seedData <- seedData %>% 
@@ -31,7 +31,7 @@ ID <- c("B09" , "B010" , "B42"  , "B011" , "B14" , "B013",  "F45" ,
         "T15" ,  "T40" ,  "T13"  , "T37" ,  "T20" ,  "W6" ,  
         "W8"  ,  "W2"  ,  "W3" ,   "W4" ,   "W5")
 SiteName <- c("Barlow", "Barlow", "Barlow", "Barlow", "Barlow", "Barlow",
-              "Forest Park", "Forest Park", "Forest Park", "Forest Park", "Forest Park", "Forest Park", 
+              "ForestPark", "ForestPark", "ForestPark", "ForestPark", "ForestPark", "ForestPark", 
               "Lacamas", "Lacamas", "Lacamas", "Lacamas", "Lacamas", "Lacamas", 
               "Marquam", "Marquam", "Marquam", "Marquam", "Marquam", "Marquam", 
               "McIver", "McIver", "McIver", "McIver", "McIver", "McIver", 
@@ -71,7 +71,7 @@ conSeedSummary <- rename(conSeedSummary, SiteName = SiteName.x)
 
 conSeedSummary$SiteName <- factor(conSeedSummary$SiteName , levels=c(
   "Barlow", "McIver", "Oxbow", "Sandy", "Wildwood",
-  "Forest Park", "Lacamas", "Marquam", "Riverview", 
+  "ForestPark", "Lacamas", "Marquam", "Riverview", 
   "Tryon"))
 
 conSeedSummary$a[is.na(conSeedSummary$a)] = 0

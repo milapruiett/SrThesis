@@ -1,8 +1,8 @@
 # do the no of canopy trees predict the no of seeds?
 library("plotrix", "tidyverse")
 detach(package:plyr)
-conSeedSummary <- read_csv("conSeedSummary.csv")
-tidySpp <- read_csv("tidySpp.csv")
+conSeedSummary <- read_csv("data/conSeedSummary.csv")
+tidySpp <- read_csv("data/tidySpp.csv")
 
 #summary by site of the mean and SE
 conSeedSite <- conSeedSummary %>% 

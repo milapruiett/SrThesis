@@ -41,10 +41,12 @@ t.test(log10(1 +count) ~ Urban, smsub)
 # fewer lg
 lgsub <- filter(conAgeByPlot, age =="lg")
 wilcox.test(count ~ Urban, lgsub)   
+t.test(log10(1 +count) ~ Urban, lgsub) 
 
 # fewer canopy
 canopy <- filter(conAgeByPlot, age =="can")
 wilcox.test(count ~ Urban, canopy)  
+t.test(log10(1 +count) ~ Urban, can) 
 
 # graph it
 conAgeByPlot$age <- factor(conAgeByPlot$age , levels=c("g", "s", "sm", "lg", "can"))
