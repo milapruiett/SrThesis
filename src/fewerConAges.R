@@ -1,5 +1,5 @@
 # are there fewer conifers of all ages?
-
+library("pscl")
 tidySpp <- read_csv("data/tidySpp.csv")
 
 # get only the conifers
@@ -15,7 +15,17 @@ perSite <- conAgeByPlot%>%
   group_by(SiteName, age) %>%
   summarize(quanitty= n())
 
-summary(aov(count ~ age * Urban, data = conAgeByPlot))
+# what is the distribution to pick the correct stat test
+ggplot(data = conAgeByPlot, aes(x = count)) +
+  facet_wrap(~ age) + 
+  geom_histogram()
+
+# what percent of the data are zeros
+100*sum(conAgeByPlot == 0)/nrow(conAgeByPlot) # = 75% of the plots are 0s
+
+mod1 <- zeroinfl(formula = count ~ Urban | Urban, dist = 'poisson', data = seedlings)
+summary(mod1)
+
 
 # so everything is per 30 m^2
 young <- c("g", "s")
@@ -27,11 +37,18 @@ conAgeByPlot <- conAgeByPlot %>%
 germ <- filter(conAgeByPlot, age =="g")
 wilcox.test(count ~ Urban, germ)
 t.test(log10(1 +count) ~ Urban, germ) 
+mod1 <- aov(log10(1 + germ$count) ~ germ$SiteName)
+tukeyfit1 <- TukeyHSD(mod1, conf.level=.95)
+tukeyfit1
 
 # fewer seedlings
 seedlings <- filter(conAgeByPlot, age =="s")
 wilcox.test(count ~ Urban, seedlings)  
 t.test(log10(1 +count) ~ Urban, seedlings) 
+mod1 <- aov(log10(1 + seedlings$count) ~ seedlings$SiteName)
+tukeyfit1 <- TukeyHSD(mod1, conf.level=.95)
+tukeyfit1
+summary(m1 <- glm(count ~ Urban, family="poisson", data=can))
 
 # fewer small
 smsub<- filter(conAgeByPlot, age =="sm")
@@ -57,7 +74,7 @@ conAgeByPlot$SiteName <- factor(conAgeByPlot$SiteName , levels=c("Barlow",
 jpeg("output/conAllAgesBySite.jpg", width=1400, height=680)
 ggplot(data = conAgeByPlot, aes(x = SiteName, y = count, fill = Urban)) +
   facet_wrap(~ age) +
-  geom_violin() +
+  geom_boxplot() +
   scale_y_continuous(trans='pseudo_log') +
   scale_fill_brewer(palette="Pastel2") +
   theme_light() 
@@ -69,15 +86,25 @@ ggplot(data = conAgeByPlot, aes(x = age, y = count, fill = Urban)) +
   scale_y_continuous(trans='pseudo_log') +
   scale_fill_brewer(palette="Pastel2") +
   theme_light() +
-  ggtitle("")+
-  ylab(bquote('Conifer Number in sampled 30 m' ^2)) 
+  theme(text=element_text(size=15)) +
+  ggtitle("") +
+  ylab(bquote('No. conifers per 30 m' ^ 2))
 dev.off()
 
 # get summaries of means
 conAgeByPlot %>%
   group_by(age, Urban) %>%
-  summarise(mean(count))
+  summarise(mean(count), std.error(count))
+
+summary(aov(tidySppCon$count ~ tidySppCon$species * tidySppCon$Urban * tidySppCon$age))
+tidyConCan <- filter(tidySppCon, age == "can")
+summary(aov(tidyConCan$count ~ tidyConCan$species * tidyConCan$Urban))
 
 
+# does the species of conifer vary between urban and rural?
+ggplot(tidySppCon, aes(fill=species, y=count, x=Urban)) + 
+  geom_bar(position="stack", stat="identity") +
+  facet_wrap(~ age, scale="free") +
+  scale_fill_brewer(palette="Set3") 
 
 

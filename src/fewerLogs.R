@@ -2,6 +2,9 @@
 
 wood<-read_csv("data/wood.csv")
 
+# there is a log with the wrong value for decay class
+wood$DecayClass[257] = 5
+
 # first look at all wood
 urban <- c("Lacamas", "FP", "RVNA", "Marquam", "Tryon")
 rural <- c("McIver", "Oxbow", "Wildwood", "Sandy", "Barlow")
@@ -25,20 +28,22 @@ ggplot(data = sumWood, aes(x = Forest, y = (1/1500)*a, fill = Urban)) +
   geom_boxplot() +
   scale_fill_brewer(palette="Pastel2") +
   theme_light() +
+  scale_y_continuous(trans='pseudo_log') +
+  ggtitle("")+
   theme(legend.title = element_blank()) +
-  ylab(bquote('Logs of all decay classes, surface area in sq cm per sq m forest surveyed')) + 
+  ylab(bquote('Surface area for all logs per transect' (cm/m)^2)) + 
   xlab("") +
-  ggtitle("Logs of all decay classes in urban and rural forests")
+  theme(text=element_text(size=15))
 dev.off()
 
 # test for significance
-summary(aov(log10(1 + a) ~ Urban / Forest, data = sumWood))
-t.test(log10(1 + sumWood$a) ~ sumWood$Urban)
+summary(aov(a ~ Urban / Forest, data = sumWood))
+t.test(sumWood$a ~ sumWood$Urban)
 
 # get the mean of each group to report out
 sumWood %>%
   group_by(Urban) %>%
-  summarise(mean(a))
+  summarise((1/1500) *mean(a))
 
 # collapse data
 avgWood <- wood %>% 
@@ -63,7 +68,7 @@ wilcox.test(avgWood$sumWood ~ avgWood$Urban)
 
 #only want decay classes 4 and 5
 
-wood45=subset(wood, DecayClass %in% c("1", "2", "3"))
+wood45=subset(wood, DecayClass %in% c("4", "5"))
 
 #need to add a column to signify if urban or rural
 urban <- c("Lacamas", "FP", "RVNA", "Marquam", "Tryon")
@@ -119,16 +124,20 @@ ggplot(data = completeWood, aes(x = Forest, y = (1/1500)*a, fill = Urban)) +
   theme(legend.title = element_blank()) +
   ylab(bquote('Logs of decay classes 4 and 5, surface area in sq cm per sq m forest surveyed')) + 
   xlab("") +
-  ggtitle("Logs of decay classes 4 and 5 in urban and rural forests")
+  ggtitle("")
 dev.off()
 
 # test for significance
 summary(aov(log10(1 + a) ~ Urban / Forest, data = completeWood))
 
+
+# what percent of the data are zeros
+100*sum(completeWood == 0)/nrow(completeWood) # = 68% of the plots are 0s
+
 # see the mean by group
 completeWood %>%
   group_by(Urban) %>%
-  summarise(mean(a))
+  summarise(1/1500 * mean(a))
 
 # collapse data of decy 4 and 5
 avgWood45 <- wood45 %>% 
@@ -149,3 +158,37 @@ dev.off()
 
 #t.test 
 wilcox.test(avgWood45$sumWood~avgWood45$Urban)
+
+# what is the relationship between logs and decay 
+woodDecay <- wood %>% 
+  group_by(Urban, Forest, DecayClass) %>% 
+  summarize(a=sum(SA))
+
+ggplot(data = woodDecay, aes(y = a, x = Urban, color=Urban)) +
+  facet_wrap(~ DecayClass) +
+  geom_boxplot() +
+  scale_y_continuous(trans='log10') +
+  scale_color_brewer(palette="Pastel2") +
+  theme_light() +
+  theme(legend.title = element_blank()) 
+
+ggplot(data = wood, aes(y = AvgDepth, x = Forest, color=Urban)) +
+  geom_boxplot() +
+  scale_y_continuous(trans='log10') +
+  scale_color_brewer(palette="Pastel2") +
+  theme_light() +
+  theme(legend.title = element_blank()) 
+
+ggplot(data = wood, aes(y = AvgDepth, x = Forest, color=Urban)) +
+  geom_point() +
+  scale_y_continuous(trans='log10') +
+  scale_color_brewer(palette="Pastel2") +
+  theme_light() +
+  theme(legend.title = element_blank()) 
+
+
+wood <- wood %>% filter(SA >0)
+
+summary(lm(AvgDepth ~  Urban + Forest, data = wood))
+
+

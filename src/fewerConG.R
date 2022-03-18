@@ -1,4 +1,6 @@
 # Are there fewer young conifers?
+library(multcomp)
+
 survey<-read_csv("data/seedling.csv") 
 survey$SiteName <- factor(survey$SiteName , levels=c("Barlow", 
                                                      "McIver", "Oxbow", "Sandy", "Wildwood", 
@@ -21,16 +23,27 @@ ggplot(data = survey, aes(x = SiteName, y = CONg, fill = as.factor(Urban))) +
   scale_fill_brewer(palette="Pastel2", name = "Urban", labels = c("Rural", "Urban")) +
   theme_light() +
   theme(legend.title = element_blank()) +
-  ylab(bquote('Conifer Germinants in sampled 5 m' ^2)) + 
+  ylab(bquote('Conifer germinants in sampled 5 m' ^2)) + 
   xlab(" ") +
+  theme(text=element_text(size=15)) +
   ggtitle("Rural forests have more conifer germinants than urban forests")
 dev.off()
 
 # how to analyze the seedling data, nested anova
-summary(aov(CONg ~ Urban / SiteName, data = survey))
+anova <- aov(CONg ~ Urban / SiteName, data = survey)
+summary(anova)
 
+# Tukey HSD test:
+mod1 <- aov(CONg ~ Urban + SiteName, data = survey)
+tukeyfit1 <- TukeyHSD(mod1, conf.level=.95)
+tukeyfit1
+
+
+
+# get the mean by urban / rural
 survey %>%
   group_by(Urban) %>%
-  summarise(mean(CONg))
+  summarise(mean(CONg), std.error(CONg))
+
 
         

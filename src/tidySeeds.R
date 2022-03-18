@@ -85,13 +85,22 @@ ggplot(data = conSeedSummary, aes(x = SiteName, y = a, fill = Urban)) +
   scale_fill_brewer(palette="Pastel2") +
   theme_light() +
   theme(legend.title = element_blank()) +
+  theme(text=element_text(size=15)) +
   ylab("Number of conifer seeds per basket") + 
   xlab("") +
   ggtitle("Fewer conifer seeds in urban forests compared to rural")
 dev.off()
 
-summary(aov(a ~ Urban / SiteName, data = conSeedSummary))
+# test for significance
+mod1 <- aov(a ~ Urban / SiteName, data = conSeedSummary) 
+summary(mod1)
+tukeyfit1 <- TukeyHSD(mod1, conf.level=.95)
+tukeyfit1
 
+# get summaries of means
+conSeedSummary %>%
+  group_by(SiteName) %>%
+  summarise(mean(a), std.error(a))
 
 
 
@@ -133,3 +142,4 @@ ggplot(data = completeSeedData, aes(x = Urban, y = a, fill=morph)) +
 
 summary(aov(a ~ Urban * morph, data =completeSeedData))
 wilcox.test(a ~ Urban, data = decSeedSummary)
+

@@ -1,5 +1,5 @@
 # do the no of canopy trees predict the no of seeds?
-library("plotrix", "tidyverse")
+library("plotrix", "tidyverse", "smatr")
 detach(package:plyr)
 conSeedSummary <- read_csv("data/conSeedSummary.csv")
 tidySpp <- read_csv("data/tidySpp.csv")
@@ -31,38 +31,48 @@ conCanSite <- conCanSummary %>%
 # inner join
 canSeed= conSeedSite %>% inner_join(conCanSite,by="SiteName")
 
-# linear model
-summary(lm(canSeed$meanSeed ~ canSeed$meanCan))
+# get by m^2
+canSeed$meanSeed <- 10000/145.5 * canSeed$meanSeed
+canSeed$meanCan <- 1/30 * canSeed$meanCan
+canSeed$seSeed <- 10000/145.5 * canSeed$seSeed
+canSeed$seCan <- 1/30 * canSeed$seCan
 
-# plot
-
-# as a line
-jpeg("output/canSeedByForestLine.jpg")
-ggplot(data = canSeed, aes(x=meanCan, y=meanSeed)) + 
-  geom_smooth(method=lm) +
-  scale_color_brewer(palette="Pastel2") +
-  geom_point(size = 4, aes(color = Urban)) +
-  geom_text(aes(label = SiteName), colour="black", size = 3)+
-  theme_light() +
-  theme(legend.title = element_blank()) +
-  ylab("Average conifer seeds per basket") + 
-  xlab("Average conifer canopy trees per transect") +
-  ggtitle("Conifer canopy trees and seeds")
-dev.off()
-
+# plot 
 # with cross erros
 jpeg("output/canSeedByForestCrossErrors.jpg")
-ggplot(data = canSeed, aes(x = meanCan, y = meanSeed, color = Urban)) +
+ggplot(data = canSeed, aes(x =meanCan, y = meanSeed, color = Urban)) +
   geom_errorbar(aes(ymin = meanSeed - seSeed, ymax = meanSeed + seSeed), col="grey") + 
   geom_errorbar(aes(xmin = meanCan - seCan, xmax = meanCan + seCan), col="grey") +
   geom_point(size = 4) +
   geom_text(aes(label = SiteName), colour="black", size = 3)+
   scale_color_brewer(palette="Pastel2") +
   theme_light() +
-  ylab("No Seeds per Basket") +
-  xlab("No Canopy Trees per Plot") +
+  theme(text=element_text(size=15)) +
+  ylab(bquote("No seeds per m" ^2))+
+  xlab(bquote("No canopy trees per m" ^2)) +
   ggtitle("Conifer canopy trees and conifer seeds")
 dev.off()
 
 
+# sma
+test <- sma(meanSeed ~ meanCan, data = canSeed, slope.test = 0)
+summary(test)
 
+# plotting sma results
+jpeg("output/canSeedByForestLine.jpg")
+ggplot(data = canSeed, aes(x = meanCan, y = meanSeed, color = Urban)) +
+  geom_point(size = 4, aes(color = Urban)) +
+  geom_abline(intercept = -318 , slope = 50611) +
+  scale_color_brewer(palette="Pastel2") +
+  geom_text(aes(label = SiteName), colour="black", size = 3)+
+  theme_light() +
+  theme(legend.title = element_blank()) +
+  theme(text=element_text(size=15)) +
+  ylab(bquote("No seeds per m" ^2)) +
+  xlab(bquote("No canopy trees per m" ^2)) +
+  ggtitle("Conifer canopy trees and seeds")
+dev.off()
+
+# if you want to show the quartiles
+# geom_abline(intercept = -908 , slope = 25260, linetype = "dotted") +
+# geom_abline(intercept = 270 , slope = 101401, linetype = "dotted") +

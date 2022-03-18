@@ -1,5 +1,7 @@
 # are there fewer decidious trees?
+tidySpp <- read_csv("data/tidySpp.csv")
 
+tidySpp$age <- factor(tidySpp$age , levels=c("g", "s", "sm", "lg", "can"))
 
 jpeg("output/morphAgePseudolog.jpg")
 ggplot(data = tidySpp, aes(x = age, y = count, fill=Urban)) + 
@@ -49,4 +51,16 @@ ggplot(data = tidyAgeSummary, aes(x = Urban, y = sum, fill=morph)) +
 dev.off()
 
 summary(aov(sum ~ Urban * age * morph, data = tidyAgeSummary))
+
+summary(aov(tidySpp$count ~ tidySpp$Urban * tidySpp$age * tidySpp$species))
+
+tidySpp$species <- factor(tidySpp$species, levels=c("ACCI", "ACMA", "ALRU", "QUGA",
+                                                    "AB", "TSHE", "THPL", "PSME"))
+
+ggplot(tidySpp, aes(fill=species, y=count, x=Urban)) + 
+  geom_bar(position="stack", stat="identity") +
+  facet_wrap(~ age, scale="free") +
+  scale_fill_brewer(palette="RdYlBu") 
+
+
 
