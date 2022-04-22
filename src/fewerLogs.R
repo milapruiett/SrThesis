@@ -43,7 +43,7 @@ t.test(sumWood$a ~ sumWood$Urban)
 # get the mean of each group to report out
 sumWood %>%
   group_by(Urban) %>%
-  summarise((1/1500) *mean(a))
+  summarise((1/1500) *mean(a), (1/1500) *std.error(a))
 
 # collapse data
 avgWood <- wood %>% 
@@ -110,19 +110,22 @@ for (forest in forestName) {
 
 #ensure forest is as a factor
 completeWood$Forest <- factor(completeWood$Forest , levels=c(
-  "Barlow", "McIver", "Oxbow", "Sandy", "Wildwood",
   "FP", "Lacamas", "Marquam", "RVNA", 
-  "Tryon"))
+  "Tryon", "Barlow", "McIver", "Oxbow", "Sandy", "Wildwood"))
+
+completeWood$Forest <- recode_factor(completeWood$Forest, RVNA = "Riverview", FP = "Forest Park")
 
 write.csv(completeWood, "data/completeWoodDecay45.csv")
 
 jpeg("output/wood45ByForest.jpg")
 ggplot(data = completeWood, aes(x = Forest, y = (1/1500)*a, fill = Urban)) +
-  geom_boxplot() +
-  scale_fill_brewer(palette="Pastel2") +
+  geom_boxplot(outlier.shape=21) +
+  scale_fill_manual(values = c("#fdcdac", "#b3e2cd")) +
   theme_light() +
+  theme(text=element_text(size=15)) +
+  scale_y_continuous(trans = "pseudo_log") + 
   theme(legend.title = element_blank()) +
-  ylab(bquote('Logs of decay classes 4 and 5, surface area in sq cm per sq m forest surveyed')) + 
+  ylab(bquote('Surface area for logs decay 4 and 5 per transect' (cm/m)^2)) + 
   xlab("") +
   ggtitle("")
 dev.off()
@@ -137,7 +140,7 @@ summary(aov(log10(1 + a) ~ Urban / Forest, data = completeWood))
 # see the mean by group
 completeWood %>%
   group_by(Urban) %>%
-  summarise(1/1500 * mean(a))
+  summarise(1/1500 * mean(a), 1/1500 * std.error(a))
 
 # collapse data of decy 4 and 5
 avgWood45 <- wood45 %>% 
@@ -192,3 +195,44 @@ wood <- wood %>% filter(SA >0)
 summary(lm(AvgDepth ~  Urban + Forest, data = wood))
 
 
+# does the amount of wood vary by decay class and urban status?
+decayWood <- wood %>% 
+  group_by(Urban, Forest,DecayClass) %>% 
+  summarize(a=sum(SA)) %>% 
+  ungroup()
+
+# remove decay class 0
+decayWood <- filter(decayWood, DecayClass > 0)
+
+# not every forest has a log of every decay class, add those in
+## Marquam 5, FP 3 5, Wildwood 5, Oxbow 5, 
+decayWood <- decayWood %>% add_row(Urban = "urban", Forest = "Marquam", DecayClass = 5, a = 0)
+decayWood <- decayWood %>% add_row(Urban = "urban", Forest = "FP", DecayClass = 5, a = 0)
+decayWood <- decayWood %>% add_row(Urban = "urban", Forest = "FP", DecayClass = 3, a = 0)
+decayWood <- decayWood %>% add_row(Urban = "rural", Forest = "Wildwood", DecayClass = 5, a = 0)
+decayWood <- decayWood %>% add_row(Urban = "rural", Forest = "Oxbow", DecayClass = 5, a = 0)
+
+summary(aov(a ~ Urban, data = decayWood[decayWood$DecayClass=="1", ]))
+summary(aov(a ~ Urban, data = decayWood[decayWood$DecayClass=="2", ]))
+summary(aov(a ~ Urban, data = decayWood[decayWood$DecayClass=="3", ]))
+summary(aov(a ~ Urban, data = decayWood[decayWood$DecayClass=="4", ]))
+summary(aov(a ~ Urban, data = decayWood[decayWood$DecayClass=="5", ]))
+
+
+summary(aov(a ~ Urban * DecayClass, data = decayWood))
+
+decayWood$DecayClass <- as.factor(decayWood$DecayClass)
+decayWood$Urban <- factor(decayWood$Urban, levels=c("urban", "rural"))
+
+ggplot(data = decayWood, aes(y = a / 15000, x = DecayClass, fill=Urban)) +
+  geom_boxplot(outlier.shape=21) +
+  scale_fill_manual(values = c("#fdcdac", "#b3e2cd")) +
+  theme_light() +
+  theme(legend.title = element_blank()) +
+  ylab(bquote("Sum of log surface area within a site" (cm /m ) ^ 2)) + 
+  xlab("Decay Class") +
+  ggtitle("")
+
+decayWood %>%
+  group_by(Urban, DecayClass) %>%
+  summarise(1/15000 * mean(a), 1/15000 * std.error(a))

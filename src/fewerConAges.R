@@ -37,7 +37,7 @@ conAgeByPlot <- conAgeByPlot %>%
 germ <- filter(conAgeByPlot, age =="g")
 wilcox.test(count ~ Urban, germ)
 t.test(log10(1 +count) ~ Urban, germ) 
-mod1 <- aov(log10(1 + germ$count) ~ germ$SiteName)
+mod1 <- aov(log10(1 + germ$count) ~ germ$Urban / germ$SiteName)
 tukeyfit1 <- TukeyHSD(mod1, conf.level=.95)
 tukeyfit1
 
@@ -45,7 +45,7 @@ tukeyfit1
 seedlings <- filter(conAgeByPlot, age =="s")
 wilcox.test(count ~ Urban, seedlings)  
 t.test(log10(1 +count) ~ Urban, seedlings) 
-mod1 <- aov(log10(1 + seedlings$count) ~ seedlings$SiteName)
+mod1 <- aov(log10(1 + seedlings$count) ~ seedlings$Urban / seedlings$SiteName)
 tukeyfit1 <- TukeyHSD(mod1, conf.level=.95)
 tukeyfit1
 summary(m1 <- glm(count ~ Urban, family="poisson", data=can))
@@ -66,17 +66,19 @@ wilcox.test(count ~ Urban, canopy)
 t.test(log10(1 +count) ~ Urban, can) 
 
 # graph it
+conAgeByPlot$age <- recode_factor(conAgeByPlot$age, g="germinant", 
+                                  s="seedling", sm="small subcanopy",
+                                  lg="large subcanopy", can="canopy")
 conAgeByPlot$age <- factor(conAgeByPlot$age , levels=c("g", "s", "sm", "lg", "can"))
-conAgeByPlot$SiteName <- factor(conAgeByPlot$SiteName , levels=c("Barlow", 
-                                                     "McIver", "Oxbow", "Sandy", "Wildwood", 
-                                                     "ForestPark", "Lacamas", "Marquam", "Riverview", 
-                                                                                                         "Tryon"))
+conAgeByPlot$SiteName <- factor(conAgeByPlot$SiteName , levels=c( "ForestPark", "Lacamas", "Marquam", 
+                                                                  "Riverview","Tryon", "Barlow", 
+                                                                  "McIver", "Oxbow", "Sandy", "Wildwood"))
 jpeg("output/conAllAgesBySite.jpg", width=1400, height=680)
 ggplot(data = conAgeByPlot, aes(x = SiteName, y = count, fill = Urban)) +
   facet_wrap(~ age) +
   geom_boxplot() +
   scale_y_continuous(trans='pseudo_log') +
-  scale_fill_brewer(palette="Pastel2") +
+  scale_fill_manual(values = c("#fdcdac", "#b3e2cd")) +
   theme_light() 
 dev.off()
 
@@ -84,11 +86,12 @@ jpeg("output/conAllAgesByUrban.jpg", width=1400, height=680)
 ggplot(data = conAgeByPlot, aes(x = age, y = count, fill = Urban)) +
   geom_boxplot(outlier.shape = 21) +
   scale_y_continuous(trans='pseudo_log') +
-  scale_fill_brewer(palette="Pastel2") +
+  scale_fill_manual(values = c("#fdcdac", "#b3e2cd")) +
   theme_light() +
   theme(text=element_text(size=15)) +
   ggtitle("") +
-  ylab(bquote('No. conifers per 30 m' ^ 2))
+  xlab("")+
+  ylab(bquote('Conifers per 30 m' ^ 2))
 dev.off()
 
 # get summaries of means

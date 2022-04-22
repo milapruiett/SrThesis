@@ -79,16 +79,20 @@ conSeedSummary$a[is.na(conSeedSummary$a)] = 0
 write_csv(conSeedSummary, "data/conSeedSummary.csv")
 
 # plotting this
+conSeedSummary$SiteName <- factor(conSeedSummary$SiteName , levels=c("ForestPark", "Lacamas", "Marquam", 
+                                                      "Riverview","Tryon", "Barlow", 
+                                                      "McIver", "Oxbow", "Sandy", "Wildwood"))
+
 jpeg("output/conSeedsByForest.jpg")
-ggplot(data = conSeedSummary, aes(x = SiteName, y = a, fill = Urban)) +
-  geom_boxplot() +
-  scale_fill_brewer(palette="Pastel2") +
+ggplot(data = conSeedSummary, aes(x = SiteName, y = (1000/145.5) * a, fill = Urban)) +
+  geom_boxplot(outlier.shape = 21) +
+  scale_fill_manual(values = c("#fdcdac","#b3e2cd")) +
   theme_light() +
   theme(legend.title = element_blank()) +
   theme(text=element_text(size=15)) +
-  ylab("Number of conifer seeds per basket") + 
+  ylab(bquote('Conifer seeds in sampled m' ^2)) + 
   xlab("") +
-  ggtitle("Fewer conifer seeds in urban forests compared to rural")
+  ggtitle("")
 dev.off()
 
 # test for significance

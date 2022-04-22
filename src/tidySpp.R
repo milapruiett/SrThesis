@@ -108,34 +108,3 @@ ggplot(data = canGermTable, aes(x = canavg, y = germavg, color=Urban)) + geom_po
 #test the line of best fit
 summary(lm(canGermTable$germavg ~ canGermTable$canavg))
 
-
-
-
-
-
-
-
-par(mfrow=c(2, 5))
-plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Riverview"]~tidySppNoZ$age[tidySppNoZ$SiteName=="Riverview"],
-     xlab="Age", ylab="No", main="Riverview")
-plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Tryon"]~tidySppNoZ$age[tidySppNoZ$SiteName=="Tryon"],
-     xlab="Age", ylab="No", main="Tryon")
-plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Marquam"]~tidySppNoZ$age[tidySppNoZ$SiteName=="Marquam"],
-     xlab="Age", ylab="No", main="Marquam")
-plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Lacamas"]~tidySppNoZ$age[tidySppNoZ$SiteName=="Lacamas"],
-     xlab="Age", ylab="No", main="Lacamas")
-plot(tidySppNoZ$count[tidySppNoZ$SiteName=="ForestPark"]~tidySppNoZ$age[tidySppNoZ$SiteName=="ForestPark"],
-     xlab="Age", ylab="No", main="ForestPark")
-plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Barlow"]~tidySppNoZ$age[tidySppNoZ$SiteName=="Barlow"],
-     xlab="Age", ylab="No", main="Barlow")
-plot(tidySppNoZ$count[tidySppNoZ$SiteName=="McIver"]~tidySppNoZ$age[tidySppNoZ$SiteName=="McIver"],
-     xlab="Age", ylab="No", main="McIver")
-plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Sandy"]~tidySppNoZ$age[tidySppNoZ$SiteName=="Sandy"],
-     xlab="Age", ylab="No", main="Sandy")
-plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Oxbow"]~tidySppNoZ$age[tidySppNoZ$SiteName=="Oxbow"],
-     xlab="Age", ylab="No", main="Oxbow")
-plot(tidySppNoZ$count[tidySppNoZ$SiteName=="Wildwood"]~tidySppNoZ$age[tidySppNoZ$SiteName=="Wildwood"],
-     xlab="Age", ylab="No", main="Wildwood")
-
-
-par(mfrow=c(1, 1))
