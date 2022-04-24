@@ -30,6 +30,7 @@ canopySp$Urban <- factor(canopySp$Urban, levels=c("urban", "rural"))
 canopySp$species <- recode_factor(canopySp$species, AB="True firs", PSME="Douglas fir", 
                                   THPL = "Western redcedar", TSHE="Western hemlock")
 
+jpeg("output/canopySp.jpg")
 ggplot(data = canopySp, aes(x = species, y = count, fill = Urban)) +
   geom_boxplot(outlier.shape = 21) +
   scale_fill_manual(values = c("#fdcdac", "#b3e2cd")) +
@@ -38,26 +39,4 @@ ggplot(data = canopySp, aes(x = species, y = count, fill = Urban)) +
   ggtitle("") +
   xlab("")+
   ylab(bquote('Canopy trees per sampled 30 m' ^ 2))
-
-
-conSeedSummary <- read_csv("data/conSeedSummary.csv")
-
-conSeedSite <- conSeedSummary %>% 
-  group_by(Urban, SiteName) %>% 
-  summarize(meanSeed=mean(a, na.rm=TRUE), seSeed=std.error(a, na.rm=TRUE))
-
-poo <- canopySp %>% inner_join(conSeedSite,by="SiteName")
-
-ggplot(data = poo, aes(x = count , y = meanSeed, color=species)) +
-  geom_point() +
-  geom_smooth(method="lm")
-
-summary(aov(meanSeed ~ count, data = poo[poo$species=="TSHE",]))
-summary(aov(meanSeed ~ count, data = poo[poo$species=="PSME",]))
-summary(aov(meanSeed ~ count, data = poo[poo$species=="AB",]))
-summary(aov(meanSeed ~ count, data = poo[poo$species=="THPL",]))
-summary(aov(meanSeed ~ count * species, data = poo)) # this doesn't quite answer my question
-
-poo %>%
-  group_by(Urban.x, species) %>%
-  summarise(mean(count), std.error(count))
+dev.off()
