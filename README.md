@@ -12,6 +12,7 @@
 
 ### SRC
 Contains all the code for analyses
+See the src.md file for explanations for each .R file and what analysis it runs
 
 ### Data
 Contains all the csvs, both imported and created files
